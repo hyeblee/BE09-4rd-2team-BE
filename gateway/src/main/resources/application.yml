@@ -1,0 +1,40 @@
+server:
+  port: 8000
+spring:
+  application:
+    name: gateway-server
+  cloud:
+    gateway:
+      routes:
+        - id: user-management
+          uri: lb://USER-MANAGEMENT
+          predicates:
+            - Path=/goodplace/user-management/**
+          filters:
+            - RewritePath=/goodplace/user-management/(?<segment>.*), /${segment}
+        - id: location-service
+          uri: lb://LOCATION-SERVICE
+          predicates:
+            - Path=/goodplace/location-service/**
+          filters:
+            - RewritePath=/goodplace/location-service/(?<segment>.*), /${segment}
+        - id: schedule-service
+          uri: lb://SCHEDULE-SERVICE
+          predicates:
+            - Path=/goodplace/schedule-service/**
+          filters:
+            - RewritePath=/goodplace/schedule-service/(?<segment>.*), /${segment}
+        - id: review-service
+          uri: lb://REVIEW-SERVICE
+          predicates:
+            - Path=/goodplace/review-service/**
+          filters:
+            - RewritePath=/goodplace/review-service/(?<segment>.*), /${segment}
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+jwt:
+  secret: LH9QZL8upsPBfuDY+Dkb1kT9DZIIUSuA2u4O6Lfi3mkEfeWtETpVTcR/8SMZdJWn/xNTuCQBE6rBvDXgnVmscQ==
