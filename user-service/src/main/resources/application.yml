@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: USER-MANAGEMENT
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql.coffit.xyz:3322/vldb
+    username: vlog
+    password: vlog
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+#jwt:
+#  secret: LH9QZL8upsPBfuDY+Dkb1kT9DZIIUSuA2u4O6Lfi3mkEfeWtETpVTcR/8SMZdJWn/xNTuCQBE6rBvDXgnVmscQ==
+#  expiration: 1800000 # ????? ????
+#  refresh-expiration: 604800000 # ?????? ????
+
+
+
+
+
+
+
+
+
+
+
+
