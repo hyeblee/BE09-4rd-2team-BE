@@ -17,7 +17,7 @@ public class Neighbor {
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="blodId")
+    @JoinColumn(name="blogId")
     private UserInfo fromUserInfo;
 
     @ManyToOne(fetch = FetchType.LAZY)
