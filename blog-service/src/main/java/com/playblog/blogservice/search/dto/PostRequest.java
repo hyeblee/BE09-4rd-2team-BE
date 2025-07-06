@@ -1,14 +1,11 @@
 package com.playblog.blogservice.search.dto;
 
 import com.playblog.blogservice.common.entity.SubTopic;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 public class PostRequest {
     private Long userId;

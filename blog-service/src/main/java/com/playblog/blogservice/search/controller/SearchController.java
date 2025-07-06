@@ -1,7 +1,9 @@
 package com.playblog.blogservice.search.controller;
 
 import com.playblog.blogservice.common.ApiResponse;
+import com.playblog.blogservice.search.dto.AllTopicResponseDto;
 import com.playblog.blogservice.search.dto.PostRequest;
+import com.playblog.blogservice.search.dto.SearchResponseDto;
 import com.playblog.blogservice.search.entity.Post;
 import com.playblog.blogservice.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
@@ -30,4 +32,17 @@ public class SearchController {
         return ResponseEntity
                 .ok(ApiResponse.success(posts));
     }
-}
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<SearchResponseDto>>> searchTitleOrContent(
+            @RequestParam String keyword) {
+        List<SearchResponseDto> results = searchService.findByTitleOrContent(keyword);
+        return ResponseEntity.ok(ApiResponse.success(results));
+    }
+
+    @GetMapping("/topics")
+    public ResponseEntity<ApiResponse<List<AllTopicResponseDto>>> getAllTopics() {
+        List<AllTopicResponseDto> topics = searchService.getAllTopics();
+        return ResponseEntity.ok(ApiResponse.success(topics));
+    }
+    }
