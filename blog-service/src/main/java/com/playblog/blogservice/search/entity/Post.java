@@ -1,6 +1,7 @@
 package com.playblog.blogservice.search.entity;
 
 import com.playblog.blogservice.common.entity.SubTopic;
+import com.playblog.blogservice.common.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,9 +20,9 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private String title;
@@ -44,11 +45,4 @@ public class Post {
     @Enumerated(EnumType.STRING)
     @Column(name = "sub_topic", nullable = false)
     private SubTopic subTopic;
-
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-    }
 }

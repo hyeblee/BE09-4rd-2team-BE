@@ -1,5 +1,6 @@
 package com.playblog.blogservice.search.repository;
 
+import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.search.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,11 +11,10 @@ import java.util.List;
 
 public interface SearchRepository extends JpaRepository<Post, Long> {
 
+    Page<Post> findAll(Pageable pageable);
 
-    List<Post> findAll();
-
-//    Page<Post> findAllByOrderByCreatedAt(Pageable pageable);
     @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% OR p.content LIKE %:keyword%")
     List<Post> findByTitleOrContetnt(String keyword);
 
+    List<Post> findBySubTopic(SubTopic subTopic);
 }
