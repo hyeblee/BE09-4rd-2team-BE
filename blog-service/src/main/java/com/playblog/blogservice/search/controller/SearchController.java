@@ -35,7 +35,7 @@ public class SearchController {
     public ResponseEntity<ApiResponse<Page<PostSummaryDto>>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
-    ) {
+    ){
         Pageable pageable = PageRequest.of(page, size);
         Page<PostSummaryDto> posts = searchService.getAllPosts(pageable);
         return ResponseEntity.ok(ApiResponse.success(posts));
@@ -65,7 +65,7 @@ public class SearchController {
     @GetMapping("/subtopics")
     public ResponseEntity<ApiResponse<List<Post>>> findBySubTopics(
             @RequestParam SubTopic subTopic
-    ) {
+    ){
         List<Post> subTopics = searchService.findBySubTopic(subTopic);
         return ResponseEntity.ok(ApiResponse.success(subTopics));
     }

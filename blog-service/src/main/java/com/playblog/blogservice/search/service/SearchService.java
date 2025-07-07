@@ -51,7 +51,6 @@ public class SearchService {
     public Page<PostSummaryDto> getAllPosts(Pageable pageable) {
         Page<Post> postsPage = searchRepository.findAll(pageable);
         List<Post> posts = postsPage.getContent();
-
         List<Long> postIds = posts.stream().map(Post::getId).toList();
 
         Map<Long, Long> likeCounts = postLikeRepository.countLikesByPostIds(postIds).stream()
