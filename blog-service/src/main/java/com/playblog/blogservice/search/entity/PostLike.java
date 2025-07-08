@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name="post_likes")
+@Table(name="test_post_likes")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
