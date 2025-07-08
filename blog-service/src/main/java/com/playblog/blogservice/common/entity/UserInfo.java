@@ -1,8 +1,13 @@
 package com.playblog.blogservice.common.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.OneToMany;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Embeddable
 @Getter
@@ -19,8 +24,8 @@ public class UserInfo {
     @Column(name = "blog_id", unique = true, nullable = false)
     private String blogId;
 
-    @Column(name = "introduce_text", length = 500)
-    private String introduceText;
+    @Column(name = "profile_intro", length = 500)
+    private String profileIntro;
 
     @Column(name = "profile_image_url")
     private String profileImageUrl;

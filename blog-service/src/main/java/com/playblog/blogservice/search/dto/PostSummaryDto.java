@@ -1,5 +1,6 @@
 package com.playblog.blogservice.search.dto;
 
+import com.playblog.blogservice.common.entity.SubTopic;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,4 +21,5 @@ public class PostSummaryDto {
     private Long likeCount;
     private Long commentCount;
     private LocalDateTime createdAt;
+    private SubTopic subTopic;
 }

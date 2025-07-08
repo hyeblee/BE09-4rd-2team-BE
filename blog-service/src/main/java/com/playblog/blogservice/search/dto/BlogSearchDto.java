@@ -12,5 +12,7 @@ import lombok.NoArgsConstructor;
 public class BlogSearchDto {
     private String blogTitle;
     private String profileIntro;
+    private String profileImageUrl;
     private String nickname;
+    private String blogId;
 }

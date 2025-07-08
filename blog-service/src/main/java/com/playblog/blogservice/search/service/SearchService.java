@@ -3,7 +3,6 @@ package com.playblog.blogservice.search.service;
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.common.entity.User;
-import com.playblog.blogservice.common.entity.UserInfo;
 import com.playblog.blogservice.search.dto.*;
 import com.playblog.blogservice.search.entity.Post;
 import com.playblog.blogservice.search.repository.*;
@@ -29,6 +28,7 @@ public class SearchService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final NeighborRepository neighborRepository;
 
     // 조회 테스트용 게시글 생성
     public void createPost(PostRequest request) {
@@ -50,41 +50,15 @@ public class SearchService {
     @Transactional(readOnly = true)
     public Page<PostSummaryDto> getAllPosts(Pageable pageable) {
         Page<Post> postsPage = searchRepository.findAll(pageable);
-        List<Post> posts = postsPage.getContent();
-        List<Long> postIds = posts.stream().map(Post::getId).toList();
-
-        Map<Long, Long> likeCounts = postLikeRepository.countLikesByPostIds(postIds).stream()
-                .collect(Collectors.toMap(
-                        arr -> (Long) arr[0],
-                        arr -> (Long) arr[1]
-                ));
-
-        Map<Long, Long> commentCounts = commentRepository.countCommentsByPostIds(postIds).stream()
-                .collect(Collectors.toMap(
-                        arr -> (Long) arr[0],
-                        arr -> (Long) arr[1]
-                ));
-
-        List<PostSummaryDto> result = posts.stream()
-                .map(post -> PostSummaryDto.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .content(post.getContent())
-                        .nickname(post.getUser().getUserInfo().getNickname())
-                        .blogTitle(post.getUser().getUserInfo().getBlogTitle())
-                        .likeCount(likeCounts.getOrDefault(post.getId(), 0L))
-                        .commentCount(commentCounts.getOrDefault(post.getId(), 0L))
-                        .createdAt(post.getCreatedAt())
-                        .build())
-                .toList();
-
+        List<PostSummaryDto> result = convertToPostSummaryDtos(postsPage.getContent());
+        // PageImpl을 사용하여 페이지 정보와 함께 반환
         return new PageImpl<>(result, pageable, postsPage.getTotalElements());
     }
 
     // 글 제목 또는 내용으로 검색
     @Transactional(readOnly = true)
     public List<PostSummaryDto> findByTitleOrContent(String keyword) {
-        List<Post> posts = searchRepository.findByTitleOrContetnt(keyword);
+        List<Post> posts = searchRepository.findByTitleOrContent(keyword);
         return posts.stream()
                 .map(post -> modelMapper.map(post, PostSummaryDto.class))
                 .toList();
@@ -113,20 +87,74 @@ public class SearchService {
 
     // 특정 주제에 해당하는 게시글 조회
     @Transactional(readOnly = true)
-    public List<Post> findBySubTopic(SubTopic subTopic) {
-        return searchRepository.findBySubTopic(subTopic);
+    public List<PostSummaryDto> findBySubTopic(SubTopic subTopic) {
+        List<Post> posts = searchRepository.findBySubTopic(subTopic);
+        return convertToPostSummaryDtos(posts);
     }
 
-    // 블로그 제목으로 게시글 조회
+    // 블로그 제목 또는 소개글로 게시글 검색
     @Transactional(readOnly = true)
-    public List<BlogSearchDto> searchByBlogTitle(String blogTitle) {
-        List<User> users = userRepository.findByUserInfo_BlogTitleContaining(blogTitle);
+    public List<BlogSearchDto> searchByBlogTitleOrProfileIntro(String blogTitle) {
+        List<User> users = userRepository.findByBlogTitleOrProfileIntro(blogTitle);
         return users.stream()
                 .map(user -> BlogSearchDto.builder()
                         .blogTitle(user.getUserInfo().getBlogTitle())
-                        .profileIntro(user.getUserInfo().getIntroduceText())
+                        .profileIntro(user.getUserInfo().getProfileIntro())
                         .nickname(user.getUserInfo().getNickname())
                         .build())
                 .toList();
-                }
+    }
+
+    // 별명 또는 블로그 아이디로 사용자 검색
+    @Transactional(readOnly = true)
+    public List<BlogSearchDto> searchByNicknameOrBlogId(String nickname) {
+        List<User> users = userRepository.findByNicknameOrBlogId(nickname);
+        return users.stream()
+                .map(user -> BlogSearchDto.builder()
+                        .profileIntro(user.getUserInfo().getProfileIntro())
+                        .nickname(user.getUserInfo().getNickname())
+                        .blogId(user.getUserInfo().getBlogId())
+                        .build())
+                .toList();
+    }
+
+    // 이웃 게시글 조회
+    @Transactional(readOnly = true)
+    public Page<PostSummaryDto> getNeighborPosts(Long myUserId, Pageable pageable) {
+        // 1. 이웃 userId 리스트 조회
+        List<Long> neighborUserIds = neighborRepository.findFollowingUserIdsByUserId(myUserId);
+        // 2. 이웃 userId로 최신 게시글 목록 조회 (페이징)
+        Page<Post> posts = searchRepository.findByUserIdInOrderByCreatedAtDesc(neighborUserIds, pageable);
+        // 3. DTO로 변환 (공통 메소드 활용)
+        List<PostSummaryDto> result = convertToPostSummaryDtos(posts.getContent());
+        // 4. PageImpl로 래핑해서 반환
+        return new PageImpl<>(result, pageable, posts.getTotalElements());
+    }
+
+    // 좋아요 수, 댓글 수 집계 후 PostSummaryDto로 변환하는 공통 메서드
+    private List<PostSummaryDto> convertToPostSummaryDtos(List<Post> posts) {
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
+        Map<Long, Long> likeCounts = postLikeRepository.countLikesByPostIds(postIds).stream()
+                .collect(Collectors.toMap(
+                        arr -> (Long) arr[0],
+                        arr -> (Long) arr[1]
+                ));
+        Map<Long, Long> commentCounts = commentRepository.countCommentsByPostIds(postIds).stream()
+                .collect(Collectors.toMap(
+                        arr -> (Long) arr[0],
+                        arr -> (Long) arr[1]
+                ));
+        return posts.stream()
+                .map(post -> PostSummaryDto.builder()
+                        .postId(post.getId())
+                        .title(post.getTitle())
+                        .content(post.getContent())
+                        .nickname(post.getUser().getUserInfo().getNickname())
+                        .blogTitle(post.getUser().getUserInfo().getBlogTitle())
+                        .likeCount(likeCounts.getOrDefault(post.getId(), 0L))
+                        .commentCount(commentCounts.getOrDefault(post.getId(), 0L))
+                        .createdAt(post.getCreatedAt())
+                        .build())
+                .toList();
+    }
 }
