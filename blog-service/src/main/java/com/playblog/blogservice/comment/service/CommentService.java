@@ -1,7 +1,7 @@
 package com.playblog.blogservice.comment.service;
 
 import com.playblog.blogservice.comment.entity.Comment;
-import com.playblog.blogservice.comment.respository.CommentRepository;
+import com.playblog.blogservice.comment.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

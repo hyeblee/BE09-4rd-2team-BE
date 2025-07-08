@@ -1,4 +1,4 @@
-package com.playblog.blogservice.comment.respository;
+package com.playblog.blogservice.comment.repository;
 
 import com.playblog.blogservice.comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;

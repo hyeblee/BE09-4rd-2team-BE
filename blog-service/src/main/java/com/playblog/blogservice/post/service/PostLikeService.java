@@ -36,22 +36,22 @@ public class PostLikeService {
         }
     }
 
-    // 2. 특정 게시글의 공감 수 조회
+    // 2. 게시글의 공감 수 조회
     public long getPostLikeCount(Long postId) {
         return postLikeRepository.countByPostId(postId);
     }
 
-    // 3. 특정 사용자가 특정 게시글에 공감했는지 확인
+    // 3. 게시글 공감 여부 확인
     public boolean isPostLikedByUser(Long postId, Long userId) {
         return postLikeRepository.existsByPostIdAndUserId(postId, userId);
     }
 
-    // 4. 특정 게시글에 공감한 사용자 목록 조회
+    // 4. 게시글에 공감한 사용자 목록 조회
     public List<PostLike> getPostLikeUsers(Long postId) {
         return postLikeRepository.findByPostIdOrderByCreatedAtDesc(postId);
     }
 
-    // 5. 특정 사용자가 공감한 게시글 목록 조회
+    // 5. 공감한 게시글 목록 조회
     public List<PostLike> getUserLikedPosts(Long userId) {
         return postLikeRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
