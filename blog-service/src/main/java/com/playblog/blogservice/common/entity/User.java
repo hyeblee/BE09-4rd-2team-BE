@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "user")
+@Table(name = "test_user")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +17,7 @@ public class User {
     private String username;
     @Column(unique = true, nullable = false)
     private String email;
-    @Embedded
-    private UserInfo userInfo;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private TestUserInfo userInfo;
 }

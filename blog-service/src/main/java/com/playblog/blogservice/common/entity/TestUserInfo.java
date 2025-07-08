@@ -1,20 +1,23 @@
 package com.playblog.blogservice.common.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.OneToMany;
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Embeddable
+@Entity
+@Table(name="test_user_info")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserInfo {
+public class TestUserInfo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
     @Column(name = "blog_title", nullable = false)
     private String blogTitle;
 

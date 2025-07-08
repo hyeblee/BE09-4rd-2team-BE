@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface NeighborRepository extends JpaRepository<Neighbor, Long> {
 
-    @Query("SELECT n.toUser.id FROM Neighbor n WHERE n.fromUser.id = :myUserId")
+    @Query("SELECT n.neighbor.id FROM Neighbor n WHERE n.user.id = :myUserId")
     List<Long> findFollowingUserIdsByUserId(@Param("myUserId") Long myUserId);
 }

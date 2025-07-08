@@ -9,26 +9,21 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "neighbor")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "test_neighbor")
+@Getter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Neighbor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 이웃을 추가한 사람 (나)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_user_id", nullable = false)
-    private User fromUser;
+    // 본인 (이웃을 추가한 사람)
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    // 내가 추가한 이웃 (상대방)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_user_id", nullable = false)
-    private User toUser;
-
-    @Column(nullable = false)
-    private LocalDateTime followedAt;
+    // 이웃 (추가된 대상)
+    @ManyToOne
+    @JoinColumn(name = "neighbor_id", nullable = false)
+    private User neighbor;
 }
+

@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByBlogTitleOrProfileIntro(@Param("blogKeyword") String blogKeyword);
 
     // 별명.아이디 검색
-    @Query("SELECT u FROM User u WHERE u.userInfo.nickname LIKE %:keyword% " +
-            "OR u.userInfo.blogId LIKE %:keyword%")
+    @Query("SELECT u FROM User u WHERE u.userInfo.nickname LIKE %:nickname% " +
+            "OR u.userInfo.blogId LIKE %:nickname%")
     List<User> findByNicknameOrBlogId(String nickname);
 }

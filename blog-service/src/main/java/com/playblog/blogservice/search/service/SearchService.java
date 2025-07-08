@@ -1,13 +1,13 @@
 package com.playblog.blogservice.search.service;
 
 import com.playblog.blogservice.common.entity.SubTopic;
+import com.playblog.blogservice.common.entity.TestUserInfo;
 import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.common.entity.User;
 import com.playblog.blogservice.search.dto.*;
 import com.playblog.blogservice.search.entity.Post;
 import com.playblog.blogservice.search.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +27,6 @@ public class SearchService {
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
     private final NeighborRepository neighborRepository;
 
     // 조회 테스트용 게시글 생성
@@ -59,9 +58,7 @@ public class SearchService {
     @Transactional(readOnly = true)
     public List<PostSummaryDto> findByTitleOrContent(String keyword) {
         List<Post> posts = searchRepository.findByTitleOrContent(keyword);
-        return posts.stream()
-                .map(post -> modelMapper.map(post, PostSummaryDto.class))
-                .toList();
+        return convertToPostSummaryDtos(posts);
     }
 
     // 모든 주제 정보 조회
@@ -95,26 +92,16 @@ public class SearchService {
     // 블로그 제목 또는 소개글로 게시글 검색
     @Transactional(readOnly = true)
     public List<BlogSearchDto> searchByBlogTitleOrProfileIntro(String blogTitle) {
-        List<User> users = userRepository.findByBlogTitleOrProfileIntro(blogTitle);
-        return users.stream()
-                .map(user -> BlogSearchDto.builder()
-                        .blogTitle(user.getUserInfo().getBlogTitle())
-                        .profileIntro(user.getUserInfo().getProfileIntro())
-                        .nickname(user.getUserInfo().getNickname())
-                        .build())
+        return userRepository.findByBlogTitleOrProfileIntro(blogTitle).stream()
+                .map(u -> toBlogSearchDto(u, false, true))
                 .toList();
     }
 
     // 별명 또는 블로그 아이디로 사용자 검색
     @Transactional(readOnly = true)
     public List<BlogSearchDto> searchByNicknameOrBlogId(String nickname) {
-        List<User> users = userRepository.findByNicknameOrBlogId(nickname);
-        return users.stream()
-                .map(user -> BlogSearchDto.builder()
-                        .profileIntro(user.getUserInfo().getProfileIntro())
-                        .nickname(user.getUserInfo().getNickname())
-                        .blogId(user.getUserInfo().getBlogId())
-                        .build())
+        return userRepository.findByNicknameOrBlogId(nickname).stream()
+                .map(u -> toBlogSearchDto(u, true, false))
                 .toList();
     }
 
@@ -156,5 +143,15 @@ public class SearchService {
                         .createdAt(post.getCreatedAt())
                         .build())
                 .toList();
+    }
+
+    private BlogSearchDto toBlogSearchDto(User user, boolean includeBlogId, boolean includeBlogTitle) {
+        TestUserInfo info = user.getUserInfo();
+        BlogSearchDto.BlogSearchDtoBuilder builder = BlogSearchDto.builder()
+                .profileIntro(info.getProfileIntro())
+                .nickname(info.getNickname());
+        if (includeBlogTitle) builder.blogTitle(info.getBlogTitle());
+        if (includeBlogId)    builder.blogId(info.getBlogId());
+        return builder.build();
     }
 }
