@@ -20,9 +20,11 @@ public class UserInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String blogTitle;
+    private String profileIntro;
     private String blogId;     // 블로그 주소
     private String nickname;   // 블로그 별명
-    private String introduce;  // 블로그 소개글
+    private String profileImageUrl;
 
     // 블로그 → 유저 (1:1)
     @OneToOne
