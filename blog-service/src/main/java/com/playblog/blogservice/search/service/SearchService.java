@@ -61,7 +61,7 @@ public class SearchService {
         return convertToPostSummaryDtos(posts);
     }
 
-    // 모든 주제 정보 조회
+    // 모든 주제 정보 가져오기
     public List<AllTopicResponseDto> getAllTopics() {
         Map<TopicType, List<SubTopic>> groupedTopics = Arrays.stream(SubTopic.values())
                 .collect(Collectors.groupingBy(SubTopic::getTopicType));
