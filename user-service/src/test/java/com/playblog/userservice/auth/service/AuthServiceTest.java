@@ -216,6 +216,33 @@ class AuthServiceTest {
   }
 
 
+  @Test
+  void 로그아웃시_저장된_리프레시토큰을_지운다() {
+    // given
+    String emailId = "login_test";
+    String password = "rawPass";
+    String deviceId = "device123";
+
+    // 1. 해당 사용사자 없으면 회원가입한다.
+    if (!userRepository.existsByEmailId(emailId)) {
+      userService.registerUser(new UserRegisterRequestDto(emailId, password));
+    }
+
+    // 2. 로그인 호출
+    LoginRequestDto loginDto = new LoginRequestDto(emailId, password, deviceId);
+    TokenResponseDto token = authService.login(loginDto);
+    // DB에서 해당 refreshToken이 저장됐는지
+    boolean exists = refreshTokenRepository.findByEmailIdAndDeviceId(emailId, deviceId).isPresent();
+    assertThat(exists).isTrue();  // 삭제되어야 하므로 false여야 함
+
+    // when
+    authService.logout(token.getRefreshToken(), deviceId);
+
+    // then: DB에서 해당 refreshToken이 삭제됐는지 확인
+    exists = refreshTokenRepository.findByEmailIdAndDeviceId(emailId, deviceId).isPresent();
+    assertThat(exists).isFalse();  // 삭제되어야 하므로 false여야 함
+  }
+
 /*  @Test
   void reissuAccessToken_invalidToken_throwsException() {
     log.info("[refreshToken_invalidToken_throwsException] 테스트 시작");
@@ -228,35 +255,7 @@ class AuthServiceTest {
     log.info("[refreshToken_invalidToken_throwsException] 테스트 종료");
   }
 
-  @Test
-  void logout_success() {
-    log.info("[logout_success] 테스트 시작");
-    String email = "test@example.com";
-    Long userId = 1L;
-    String deviceId = "device123";
 
-    // 실제 JwtTokenProvider를 사용하여 토큰 생성
-    String refreshToken = jwtTokenProvider.createRefreshToken(email, Role.USER.name(), userId,
-        deviceId);
-
-    RefreshToken savedToken = RefreshToken.builder()
-        .emailId(email)
-        .deviceId(deviceId)
-        .token(refreshToken)
-        .expiryDate(new Date())
-        .build();
-
-    when(jwtTokenProvider.validateToken(refreshToken)).thenCallRealMethod();
-    when(jwtTokenProvider.getEmailIdFromJWT(refreshToken)).thenCallRealMethod();
-    when(refreshTokenRepository.findByEmailIdAndDeviceId(email, deviceId)).thenReturn(
-        Optional.of(savedToken));
-    doNothing().when(refreshTokenRepository).delete(savedToken);
-
-    authService.logout(refreshToken, deviceId);
-
-    verify(refreshTokenRepository).delete(savedToken);
-    log.info("[logout_success] 테스트 종료");
-  }
 
 
   @Test
