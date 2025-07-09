@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "posttest")
+@Table(name = "test_post")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,7 +38,7 @@ public class Post {
     private String thumbnailImageUrl;
 
     @ElementCollection
-    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
+    @CollectionTable(name = "test_post_images", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "image_urls")
     private List<String> imageUrls = new ArrayList<>();
 
