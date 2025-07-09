@@ -6,8 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+
 @Service
 @RequiredArgsConstructor
+// 사용자 정보 생성, 수정, 삭제는 나와 Admin만 가능하게 제한
 public class UserInfoService {
 
   private final UserInfoRepository userInfoRepository;
@@ -44,5 +47,11 @@ public class UserInfoService {
     userInfo.setProfileIntro(dto.getProfileIntro());
 
     return new UserInfoResponse(userInfo);
+  }
+
+  public void deleteUserInfo(Long userId) {
+    UserInfo userInfo = userInfoRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("해당 유저 없음: id=" + userId));
+    userInfoRepository.delete(userInfo);
   }
 }
