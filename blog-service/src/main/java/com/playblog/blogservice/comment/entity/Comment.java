@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "comments")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {
 
@@ -25,7 +26,7 @@ public class Comment {
     private Long postId; // 게시글 id
 
     @Column(name = "author_id", nullable = false)
-    private Long authorId; // 작성자 id
+    private Long authorId; // 작성자 id, UserInfo ID (User Service 참조, UserInfo 테이블의 ID)
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
