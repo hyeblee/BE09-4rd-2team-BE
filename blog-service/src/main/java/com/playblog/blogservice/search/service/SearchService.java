@@ -171,6 +171,8 @@ public class SearchService {
                         .content(post.getContent())
                         .nickname(post.getUser().getUserInfo().getNickname())
                         .blogTitle(post.getUser().getUserInfo().getBlogTitle())
+                        .thumbnailImageUrl(post.getThumbnailImageUrl())
+                        .profileImageUrl(post.getUser().getUserInfo().getProfileImageUrl())
                         .likeCount(likeCounts.getOrDefault(post.getId(), 0L))
                         .commentCount(commentCounts.getOrDefault(post.getId(), 0L))
                         .createdAt(post.getCreatedAt())
