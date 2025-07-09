@@ -29,7 +29,7 @@ public class RefreshToken {
   @Column(nullable = false)
   private String deviceId; // 멀티 로그인을 위한 deviceId
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false, unique = true, length = 1000)
   private String token;
 
   @Column(nullable = false)

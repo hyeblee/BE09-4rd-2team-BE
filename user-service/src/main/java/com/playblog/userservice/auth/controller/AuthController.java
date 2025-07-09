@@ -30,7 +30,7 @@ public class AuthController {
   public ResponseEntity<ApiResponse<TokenResponseDto>> refreshToken(
       @RequestBody RefreshTokenRequestDto request
   ){
-    TokenResponseDto response = authService.refreshToken(request.getRefreshToken(), request.getDeviceId());
+    TokenResponseDto response = authService.reissueAccessToken(request.getRefreshToken(), request.getDeviceId());
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 

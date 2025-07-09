@@ -66,40 +66,47 @@ public class AuthService {
   }
 
   @Transactional
-  public TokenResponseDto refreshToken(String refreshToken, String deviceId) {
-    // 토큰 유효성 검사 (서명, 만료 등)
+  public TokenResponseDto reissueAccessToken(String refreshToken, String deviceId) {
+    // 1. RefreshToken 유효성 검사 (서명, 만료 등)
     if (!jwtTokenProvider.validateToken(refreshToken)) {
-      throw new BadCredentialsException("Invalid Refresh Token");
+      throw new BadCredentialsException("Invalid or Expired Refresh Token");
     }
 
-    // JWT 내부에서 emailId 추출
+    // 2. JWT에서 이메일 추출
     String emailId = jwtTokenProvider.getEmailIdFromJWT(refreshToken);
 
-    // 저장된 토큰 조회 (email + device 조합)
-    RefreshToken savedToken = refreshTokenRepository.findByEmailIdAndDeviceId(emailId, deviceId)
+    // 3. DB에서 저장된 RefreshToken 조회 (email + deviceId 조합)
+    RefreshToken savedRefreshToken = refreshTokenRepository.findByEmailIdAndDeviceId(emailId, deviceId)
         .orElseThrow(() -> new BadCredentialsException("Refresh Token not found"));
 
-    // 전달받은 토큰과 DB 저장 토큰이 일치하는지 확인
-    if (!savedToken.getToken().equals(refreshToken)) {
+    // 4. DB에 저장된 토큰과 전달된 토큰이 일치하는지 확인
+    if (!savedRefreshToken.getToken().equals(refreshToken)) {
       throw new BadCredentialsException("Refresh Token mismatch");
     }
 
-    // 유저 정보 조회
+    // 5. 유저 정보 조회
     User user = userRepository.findByEmailId(emailId)
         .orElseThrow(() -> new BadCredentialsException("User not found"));
 
-    // 새 토큰 생성
-    String newAccessToken = jwtTokenProvider.createAccessToken(emailId, user.getRole().name(), user.getId());
-    String newRefreshToken = jwtTokenProvider.createRefreshToken(emailId, user.getRole().name(), user.getId(), deviceId);
-
-    // 토큰 갱신
-    savedToken.updateToken(
-        newRefreshToken,
-        new Date(System.currentTimeMillis() + jwtTokenProvider.getRefreshExpiration())
+    // 6. AccessToken은 무조건 새로 발급
+    String newAccessToken = jwtTokenProvider.createAccessToken(
+        emailId,
+        user.getRole().name(),
+        user.getId()
     );
-    refreshTokenRepository.save(savedToken);
 
+    // 7. refereshToken 쓰일 때마다 새로 발급 (Rotation 방식)
+    String newRefreshToken = jwtTokenProvider.createRefreshToken(
+        emailId,
+        user.getRole().name(),
+        user.getId(),
+        deviceId
+    );
 
+    Date newExpiryDate = new Date(System.currentTimeMillis() + jwtTokenProvider.getRefreshExpiration());
+    savedRefreshToken.updateToken(newRefreshToken, newExpiryDate);
+
+    // 8. 응답 DTO 반환
     return TokenResponseDto.builder()
         .accessToken(newAccessToken)
         .refreshToken(newRefreshToken)

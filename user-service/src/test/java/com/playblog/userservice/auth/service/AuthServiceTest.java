@@ -35,8 +35,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
 class AuthServiceTest {
+
   @Autowired
-  private UserService userService ;
+  private UserService userService;
 
   private static final Logger log = LoggerFactory.getLogger(AuthServiceTest.class);
 
@@ -77,11 +78,18 @@ class AuthServiceTest {
 
   @Test
   void 로그인_시_액세스_토큰과_리프레시_토큰을_발급하여_저장한다() {
+    String emailId = "login_test";
+    String password = "rawPass";
+    String deviceId = "device123";
+
+    // 1. 해당 사용사자 없으면 회원가입한다.
+    if (!userRepository.existsByEmailId(emailId)) {
+      userService.registerUser(new UserRegisterRequestDto(emailId, password));
+    }
 
     // 2. 로그인 호출
-    LoginRequestDto loginDto = new LoginRequestDto("test1", "rawPass", "device123");
+    LoginRequestDto loginDto = new LoginRequestDto(emailId, password, deviceId);
     TokenResponseDto token = authService.login(loginDto);
-
 
     // 3. 검증
     assertThat(token.getAccessToken()).isNotBlank();
@@ -92,126 +100,128 @@ class AuthServiceTest {
   }
 
 
-
-
-  /*@Test
-  @DisplayName("리프레시 토큰과 액세스 토큰 재발급 테스트")
-  void refreshToken_success() throws InterruptedException {
+  @Test
+  void 리프레시토큰과_액세스토큰을_재발급한다() throws InterruptedException {
     // given
-    log.info("[refreshToken_success] 테스트 시작");
-    String email = "test";
-    String role = "USER";
-    Long userId = 1L;
+    String emailId = "refresh_test";
+    String password = "rawPass";
     String deviceId = "device123";
 
-    // 기존 refreshToken 생성 (가짜로 토큰 생성해서 저장되어 있다고 가정)
-    String oldRefreshToken = jwtTokenProvider.createRefreshToken(email, role, userId, deviceId);
+    // 1. 해당 사용자가 없으면 회원가입한다.
+    if (!userRepository.existsByEmailId(emailId)) {
+      userService.registerUser(new UserRegisterRequestDto(emailId, password));
+    }
 
-    RefreshToken savedToken = RefreshToken.builder()
-        .emailId(email)
-        .deviceId(deviceId)
-        .token(oldRefreshToken)
-        .expiryDate(new Date())
-        .build();
+    // 2. 로그인하여 토큰을 발급한다.
+    TokenResponseDto tokenResponseDto = authService.login(
+        new LoginRequestDto(emailId, password, deviceId));
+    String oldRefreshToken = tokenResponseDto.getRefreshToken();
+    String oldAccessToken = tokenResponseDto.getAccessToken();
+
+    // wait 3초 (토큰 재발급 시각 차이 확인용)
+    Thread.sleep(3000);
+
+    // when: reissueAccessToken 호출하여 토큰을 재발급한다.
+    TokenResponseDto response = authService.reissueAccessToken(oldRefreshToken, deviceId);
+
+    log.info("Old AccessToken     : {}", oldAccessToken);
+    log.info("New AccessToken     : {}", response.getAccessToken());
+    log.info("Old RefreshToken    : {}", oldRefreshToken);
+    log.info("New RefreshToken    : {}", response.getRefreshToken());
+
+    // then: 새 토큰이 생성되고, 저장소에 반영되었는지 확인
+    assertThat(response.getAccessToken())
+        .as("AccessToken이 비어있지 않아야 함")
+        .isNotBlank();
+
+    assertThat(response.getRefreshToken())
+        .as("RefreshToken이 비어있지 않아야 함")
+        .isNotBlank();
+
+    assertThat(response.getAccessToken())
+        .as("AccessToken이 이전 것과 달라야 함")
+        .isNotEqualTo(oldAccessToken);
+
+    assertThat(response.getRefreshToken())
+        .as("RefreshToken이 이전 것과 달라야 함")
+        .isNotEqualTo(oldRefreshToken);
+
+
+
+    // DB에 저장된 refreshToken 값이 새로 발급된 값과 같은지 확인
+    RefreshToken updatedToken = refreshTokenRepository.findByEmailIdAndDeviceId(emailId, deviceId)
+        .orElseThrow(() -> new AssertionError("리프레시 토큰이 저장되지 않았습니다."));
+
+    assertThat(updatedToken.getToken())
+        .as("DB에 저장된 RefreshToken이 새로 발급된 값과 일치해야 함")
+        .isEqualTo(response.getRefreshToken());
+  }
+
+  @Test
+  void 디바이스별_새로운_리프레시_토큰을_발급하고_저장한다() {
+    // given
+    String emailId = "diffrent_device_test";
+    String password = "encodedPass";
+    String role = "USER";
+    Long userId = 1L;
+    String deviceId1 = "deviceA";
+    String deviceId2 = "deviceB";
 
     User user = User.builder()
         .id(userId)
-        .emailId(email)
-        .password("encodedPass")
+        .emailId(emailId)
+        .password(password)
         .role(Role.USER)
         .build();
 
-    // when: Mock Stubbing
-    when(refreshTokenRepository.findByEmailIdAndDeviceId(email, deviceId)).thenReturn(Optional.of(savedToken));
-    when(userRepository.findByEmailId(email)).thenReturn(Optional.of(user));
-    when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    Thread.sleep(3000);
-
-    // 실제 refreshToken 로직 호출
-    TokenResponseDto response = authService.refreshToken(oldRefreshToken, deviceId);
-
-    // then
-    log.info("[refreshToken_success] 발급된 AccessToken: {}", response.getAccessToken());
-    log.info("[refreshToken_success] 발급된 RefreshToken: {}", response.getRefreshToken());
-
-    // 새 토큰이 발급되었는지 확인 (이전 토큰과 다름)
-    assertThat(response.getRefreshToken()).isNotEqualTo(oldRefreshToken);
-    assertThat(response.getAccessToken()).isNotBlank();
-    assertThat(response.getRefreshToken()).isNotBlank();
-
-    // 저장된 토큰이 새로 바뀌었는지 확인
-    verify(refreshTokenRepository).save(argThat(token ->
-        token.getEmailId().equals(email) &&
-            token.getDeviceId().equals(deviceId) &&
-            token.getToken().equals(response.getRefreshToken())
-    ));
-
-    log.info("[refreshToken_success] 테스트 종료");
-  }
-
-    @Test
-    @DisplayName("기기별로 다른 RefreshToken 저장 테스트")
-    void saveRefreshToken_perDevice() {
-      // given
-      String email = "test@example.com";
-      String password = "encodedPass";
-      String role = "USER";
-      Long userId = 1L;
-      String deviceId1 = "deviceA";
-      String deviceId2 = "deviceB";
-
-      User user = User.builder()
-          .id(userId)
-          .emailId(email)
-          .password(password)
-          .role(Role.USER)
-          .build();
-
-      String refreshToken1 = "refreshTokenA";
-      String refreshToken2 = "refreshTokenB";
-      String accessToken1 = "accessTokenA";
-      String accessToken2 = "accessTokenB";
-
-      when(userRepository.findByEmailId(email)).thenReturn(Optional.of(user));
-      when(jwtTokenProvider.createAccessToken(email, role, userId)).thenReturn(accessToken1, accessToken2);
-      when(jwtTokenProvider.createRefreshToken(email, role, userId, deviceId1)).thenReturn(refreshToken1);
-      when(jwtTokenProvider.createRefreshToken(email, role, userId, deviceId2)).thenReturn(refreshToken2);
-      when(refreshTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-      // when
-      LoginRequestDto request1 = new LoginRequestDto(email, password, deviceId1);
-      LoginRequestDto request2 = new LoginRequestDto(email, password, deviceId2);
-
-      authService.login(request1);
-      authService.login(request2);
-
-      // then
-      verify(refreshTokenRepository, times(2)).save(tokenCaptor.capture());
-
-      List<RefreshToken> savedTokens = tokenCaptor.getAllValues();
-      for (RefreshToken token : savedTokens) {
-        System.out.println("=== 저장된 토큰 ===");
-        System.out.println("Email    : " + token.getEmailId());
-        System.out.println("DeviceId : " + token.getDeviceId());
-        System.out.println("Token    : " + token.getToken());
-      }
-
-      assertThat(savedTokens).hasSize(2);
-      assertThat(savedTokens).extracting("deviceId")
-          .containsExactlyInAnyOrder(deviceId1, deviceId2);
+    // 1. 테스트용 회원이 없다면 회원가입한다
+    if (!userRepository.existsByEmailId(emailId)) {
+      userService.registerUser(new UserRegisterRequestDto(emailId, password));
     }
 
+    // when
+    LoginRequestDto request1 = new LoginRequestDto(emailId, password, deviceId1);
+    LoginRequestDto request2 = new LoginRequestDto(emailId, password, deviceId2);
+
+    // 2. 같은 회원이 다른 기기에서 로그인한다.
+    TokenResponseDto tokenResponseDto1 = authService.login(request1);
+    TokenResponseDto tokenResponseDto2 = authService.login(request2);
+
+    // then
+    assertThat(tokenResponseDto1.getRefreshToken())
+        .as("device1 로그인 시, 토큰 값이 비어있지 않아야 함.").isNotBlank();
+
+    assertThat(tokenResponseDto2.getRefreshToken())
+        .as("device2 로그인 시, 토큰 값이 비어있지 않아야 함.").isNotBlank();
+
+    assertThat(tokenResponseDto1.getRefreshToken())
+        .as("device1과 device2의 리프레시 토큰값이 같지 않아야 함.").isNotEqualTo(
+        tokenResponseDto2.getRefreshToken());
+
+    // DB에서 각각 deviceId별로 RefreshToken 저장 확인
+    RefreshToken savedToken1 = refreshTokenRepository.findByEmailIdAndDeviceId(emailId, deviceId1)
+        .orElseThrow(() -> new AssertionError("deviceA의 리프레시 토큰이 저장되지 않았습니다."));
+    RefreshToken savedToken2 = refreshTokenRepository.findByEmailIdAndDeviceId(emailId, deviceId2)
+        .orElseThrow(() -> new AssertionError("deviceB의 리프레시 토큰이 저장되지 않았습니다."));
+
+    assertThat(savedToken1.getToken())
+        .as("device1의 토큰값이 db에 저장된 값과 일치해야 함").isEqualTo(tokenResponseDto1.getRefreshToken());
+
+    assertThat(savedToken2.getToken())
+        .as("device2의 토큰값이 db에 저장된 값과 일치해야 함").isEqualTo(tokenResponseDto2.getRefreshToken());
+
+    assertThat(savedToken1.getToken())
+        .as("db에 저장된 device1과 device2의 토큰값이 같지 않아야 함").isNotEqualTo(savedToken2.getToken());
+
+  }
 
 
-
-
-  @Test
-  void refreshToken_invalidToken_throwsException() {
+/*  @Test
+  void reissuAccessToken_invalidToken_throwsException() {
     log.info("[refreshToken_invalidToken_throwsException] 테스트 시작");
     when(jwtTokenProvider.validateToken("invalid-token")).thenReturn(false);
 
-    assertThatThrownBy(() -> authService.refreshToken("invalid-token", "device123"))
+    assertThatThrownBy(() -> authService.reissueAccessToken("invalid-token", "device123"))
         .isInstanceOf(BadCredentialsException.class)
         .hasMessageContaining("Invalid Refresh Token");
 
@@ -226,7 +236,8 @@ class AuthServiceTest {
     String deviceId = "device123";
 
     // 실제 JwtTokenProvider를 사용하여 토큰 생성
-    String refreshToken = jwtTokenProvider.createRefreshToken(email, Role.USER.name(), userId, deviceId);
+    String refreshToken = jwtTokenProvider.createRefreshToken(email, Role.USER.name(), userId,
+        deviceId);
 
     RefreshToken savedToken = RefreshToken.builder()
         .emailId(email)
@@ -258,7 +269,6 @@ class AuthServiceTest {
         .hasMessageContaining("Invalid Refresh Token");
 
     log.info("[logout_invalidToken_throwsException] 테스트 종료");
-  }
-  */
+  }*/
 }
 
