@@ -62,7 +62,7 @@ public class PostLikeController {
         return ResponseEntity.ok(response);
     }
 
-    // 3. 게시글 공감 여부 확인 (개발용)
+    // 3. 게시글 공감 여부 확인
     @GetMapping("/posts/{postId}/like/status")
     public ResponseEntity<Map<String, Object>> getPostLikeStatus(@PathVariable Long postId) {
         // TODO: JWT 토큰에서 사용자 ID 추출

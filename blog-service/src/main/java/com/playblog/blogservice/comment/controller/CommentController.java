@@ -41,29 +41,12 @@ public class CommentController {
     // 2. 댓글 목록 조회
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Map<String, Object>> getComments(@PathVariable Long postId) {
-        List<Comment> comments = commentService.getCommentsByPostId(postId);
-        // TODO: JWT 토큰에서 사용자 ID 추출 (현재는 임시로 1L)
+
         Long requestUserId = 1L;
-        // TODO: 게시글 작성자 ID 조회 (현재는 임시로 1L)
         Long postAuthorId = 1L;
 
-        List<Map<String, Object>> commentList = comments.stream()
-                .map(comment -> {
-                    Map<String, Object> commentMap = new HashMap<>();
-                    commentMap.put("commentId", comment.getId());
-                    commentMap.put("author", Map.of(
-                            "id", comment.getAuthorId(),
-                            "nickname", "임시닉네임", // TODO: User Service 연동
-                            "profileImage", "임시프로필URL"
-                    ));
-                    commentMap.put("content", commentService.getDisplayContent(comment, requestUserId, postAuthorId));
-                    commentMap.put("isSecret", comment.getIsSecret());
-                    commentMap.put("likeCount", comment.getLikeCount());
-                    commentMap.put("isLiked", false); // TODO: CommentLike 조회
-                    commentMap.put("createdAt", comment.getCreatedAt());
-                    return commentMap;
-                })
-                .collect(Collectors.toList());
+        List<Map<String, Object>> commentList = commentService.getCommentsWithDetails(postId, requestUserId, postAuthorId);
+
 
         Map<String, Object> response = new HashMap<>();
         response.put("comments", commentList);

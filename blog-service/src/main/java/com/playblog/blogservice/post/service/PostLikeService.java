@@ -51,34 +51,4 @@ public class PostLikeService {
         return postLikeRepository.findByPostIdOrderByCreatedAtDesc(postId);
     }
 
-    // 5. 공감한 게시글 목록 조회
-    public List<PostLike> getUserLikedPosts(Long userId) {
-        return postLikeRepository.findByUserIdOrderByCreatedAtDesc(userId);
-    }
-
-    // 6. 게시글 공감 강제 추가 (중복 체크 없이)
-    @Transactional
-    public PostLike addPostLike(Long postId, Long userId) {
-        // 이미 공감했는지 체크
-        if (postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
-            throw new RuntimeException("이미 공감한 게시글입니다.");
-        }
-
-        PostLike postLike = PostLike.builder()
-                .postId(postId)
-                .userId(userId)
-                .build();
-
-        return postLikeRepository.save(postLike);
-    }
-
-    // 7. 게시글 공감 강제 삭제
-    @Transactional
-    public void removePostLike(Long postId, Long userId) {
-        if (!postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
-            throw new RuntimeException("공감하지 않은 게시글입니다.");
-        }
-
-        postLikeRepository.deleteByPostIdAndUserId(postId, userId);
-    }
 }

@@ -43,7 +43,7 @@ public class CommentLikeService {
             CommentLike commentLike = CommentLike.builder()
                     .commentId(commentId).userId(userId).build(); // 완전히 새로운 객체를 만듦.
             commentLikeRepository.save(commentLike); // db에 저장
-            comment.decrementLikeCount(); // 댓글 공감 수 증가
+            comment.incrementLikeCount(); // 댓글 공감 수 증가
             return true; // 공감 추가
         }
     }

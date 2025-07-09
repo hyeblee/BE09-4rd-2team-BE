@@ -1,12 +1,16 @@
 package com.playblog.blogservice.comment.service;
 
 import com.playblog.blogservice.comment.entity.Comment;
+import com.playblog.blogservice.comment.repository.CommentLikeRepository;
 import com.playblog.blogservice.comment.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +18,8 @@ import java.util.List;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final CommentLikeService commentLikeService;
 
     // 1. 댓글 작성
     @Transactional
@@ -28,9 +34,36 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    // 2. 댓글 목록 조회 (특정 게시글)
-    public List<Comment> getCommentsByPostId(Long postId) {
-        return commentRepository.findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
+    // 2. 댓글 목록 조회
+    public List<Map<String, Object>> getCommentsWithDetails(Long postId, Long requestUserId, Long postAuthorId) {
+        // 1. 댓글 목록 조회
+        List<Comment> comments = commentRepository.findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
+
+        // 2. 댓글 목록을 Map 형태로 전환
+        return comments.stream().map(comment -> {
+                    Map<String, Object> commentMap = new HashMap<>();
+                    commentMap.put("commentId", comment.getId());
+
+                    // 작성자 정보
+                    commentMap.put("author", Map.of(
+                            "id", comment.getAuthorId(),
+                            "nickname", "임시닉네임",
+                            "profileImage", "임시프로필URL"
+                    ));
+
+                    // 댓글 내용(권한에 따라)
+                    commentMap.put("content", getDisplayContent(comment, requestUserId, postAuthorId));
+                    commentMap.put("isSecret", comment.getIsSecret());
+
+                    // 공감 정보
+                    commentMap.put("likeCount", comment.getLikeCount());
+                    commentMap.put("isLiked", commentLikeService.isCommentLikedByUser(comment.getId(), requestUserId));
+
+                    commentMap.put("createdAt", comment.getCreatedAt());
+
+                    return commentMap;
+                })
+                .collect(Collectors.toList());
     }
 
     // 3. 댓글 수정
@@ -62,7 +95,7 @@ public class CommentService {
         comment.markAsDeleted();
     }
 
-    // 5. 비밀댓글 권한 체크 (비즈니스 로직)
+    // 5. 댓글 목록 조회 시 비밀댓글 권한 체크 (비즈니스 로직)
     public boolean canViewContent(Comment comment, Long requestUserId, Long postAuthorId) {
         // 삭제된 댓글은 볼 수 없음
         if (comment.getIsDeleted()) {
@@ -94,4 +127,6 @@ public class CommentService {
         }
         return "비밀댓글입니다";
     }
+
+
 }
