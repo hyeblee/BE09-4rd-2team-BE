@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Post {
+public class TestPost {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
