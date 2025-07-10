@@ -1,25 +1,25 @@
 package com.playblog.blogservice.search.entity;
 
-import com.playblog.blogservice.common.entity.User;
+import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comments")
+@Table(name = "test_comments")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment {
+public class TestComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+    private TestPost testPost;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

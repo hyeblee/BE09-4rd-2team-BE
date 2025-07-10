@@ -17,7 +17,9 @@ public class PostSummaryDto {
     private String title;
     private String content;
     private String nickname;      // 작성자
-    private String blogTitle;     // 블로그 이름
+    private String blogTitle; // 블로그 이름
+    private String thumbnailImageUrl; // 썸네일
+    private String profileImageUrl; // 프로필 이미지
     private Long likeCount;
     private Long commentCount;
     private LocalDateTime createdAt;
