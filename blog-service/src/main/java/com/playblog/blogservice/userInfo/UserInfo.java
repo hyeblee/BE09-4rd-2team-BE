@@ -7,8 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,6 +32,7 @@ public class UserInfo {
   String nickname;
   String blogId;
   String profileIntro; // 프로필 소개글
+  String profileImageUrl; // 프로필 이미지 URL
 
   // Neighbor은 단방향 참조 예정..
 /*  @OneToMany(mappedBy = "fromUserInfo")

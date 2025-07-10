@@ -1,6 +1,7 @@
 package com.playblog.blogservice.postservice.post.controller;
 
 import com.playblog.blogservice.postservice.post.dto.PostRequestDto;
+import com.playblog.blogservice.postservice.post.dto.PostResponseDto;
 import com.playblog.blogservice.postservice.post.entity.Post;
 import com.playblog.blogservice.postservice.post.service.PostService;
 import jakarta.validation.Valid;
@@ -25,4 +26,11 @@ public class PostController {
         Post post = postService.publishPost(requestDto, thumbnailFile);
         return ResponseEntity.status(HttpStatus.CREATED).body(post);
     }
+
+    @GetMapping("/main/{postId}")
+    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long postId) {
+        PostResponseDto post = postService.getPost(postId);
+        return ResponseEntity.ok(post);
+    }
+
 }

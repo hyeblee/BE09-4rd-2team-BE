@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestPostLike {
+public class PostLike {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

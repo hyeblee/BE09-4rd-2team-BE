@@ -7,12 +7,18 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import com.playblog.blogservice.user.User;
 
 @Entity
 @Getter
 @Setter(AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
+
+    /* 유저 참조 */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     /* 아이디 */
     @Id
@@ -55,7 +61,6 @@ public class Post {
     /* 발행 시각 */
     @CreationTimestamp // 엔터티 생성 시 현재 시간 자동 저장
     private LocalDateTime publishedAt;
-
 //    /* 태그 */
 //    @ElementCollection(fetch = FetchType.EAGER) // 간단한 값들의 컬렉션을 매핑
 //    @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
@@ -71,7 +76,8 @@ public class Post {
             String category,
             TopicType topicType,
             SubTopic subTopic,
-            PostVisibility visibility
+            PostVisibility visibility,
+            User user
 //            List<String> tags
     ) {
         this.title = title;
@@ -81,6 +87,7 @@ public class Post {
         this.topicType = topicType;
         this.subTopic = subTopic;
         this.visibility = visibility;
+        this.user = user;
         // this.tags = tags;
     }
 }

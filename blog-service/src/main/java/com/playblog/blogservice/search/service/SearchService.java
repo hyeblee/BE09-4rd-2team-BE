@@ -108,7 +108,7 @@ public class SearchService {
             throw new SearchException(ErrorCode.INVALID_PARAMETER);
         }
         List<BlogSearchDto> result = userInfoRepository.findByBlogTitleOrProfileIntro(blogTitle).stream()
-                .map(info -> toBlogSearchDto(info, false, true))
+                .map(info -> toBlogSearchDto(info))
                 .toList();
 
         if (result.isEmpty()) {
@@ -124,7 +124,7 @@ public class SearchService {
             throw new SearchException(ErrorCode.INVALID_PARAMETER);
         }
         List<BlogSearchDto> result = userInfoRepository.findByNicknameOrBlogId(nickname).stream()
-                .map(u -> toBlogSearchDto(u, true, false))
+                .map(u -> toBlogSearchDto(u))
                 .toList();
 
         if (result.isEmpty()) {
@@ -154,8 +154,8 @@ public class SearchService {
 
 
     // 좋아요 수, 댓글 수 집계 후 PostSummaryDto로 변환하는 공통 메서드
-    private List<PostSummaryDto> convertToPostSummaryDtos(List<TestPost> posts) {
-        List<Long> postIds = posts.stream().map(TestPost::getId).toList();
+    private List<PostSummaryDto> convertToPostSummaryDtos(List<TestPost> testPosts) {
+        List<Long> postIds = testPosts.stream().map(TestPost::getId).toList();
         Map<Long, Long> likeCounts = postLikeRepository.countLikesByPostIds(postIds).stream()
                 .collect(Collectors.toMap(
                         arr -> (Long) arr[0],
@@ -166,37 +166,37 @@ public class SearchService {
                         arr -> (Long) arr[0],
                         arr -> (Long) arr[1]
                 ));
-        return posts.stream()
-                .map(post -> {
-                    User user = post.getUser();
+        return testPosts.stream()
+                .map(testPost -> {
+                    User user = testPost.getUser();
                     UserInfo info = userInfoRepository
                             .findByUser(user)
                             .orElseThrow(() -> new SearchException(ErrorCode.USER_NOT_FOUND));
 
                     return PostSummaryDto.builder()
-                            .postId(post.getId())
-                            .title(post.getTitle())
-                            .content(post.getContent())
+                            .postId(testPost.getId())
+                            .title(testPost.getTitle())
+                            .content(testPost.getContent())
                             .nickname(info.getNickname())
                             .blogTitle(info.getBlogTitle())
-                            .thumbnailImageUrl(post.getThumbnailImageUrl())
-                            .profileImageUrl(info.getProfileIntro())
-                            .likeCount(likeCounts.getOrDefault(post.getId(), 0L))
-                            .commentCount(commentCounts.getOrDefault(post.getId(), 0L))
-                            .createdAt(post.getPublishedAt())
-                            .subTopic(post.getSubTopic())
+                            .thumbnailImageUrl(testPost.getThumbnailImageUrl())
+                            .profileImageUrl(info.getProfileImageUrl())
+                            .likeCount(likeCounts.getOrDefault(testPost.getId(), 0L))
+                            .commentCount(commentCounts.getOrDefault(testPost.getId(), 0L))
+                            .createdAt(testPost.getPublishedAt())
+                            .subTopic(testPost.getSubTopic())
                             .build();
                 })
                 .toList();
     }
 
-    private BlogSearchDto toBlogSearchDto(UserInfo info, boolean includeBlogId, boolean includeBlogTitle) {
+    private BlogSearchDto toBlogSearchDto(UserInfo info) {
         BlogSearchDto.BlogSearchDtoBuilder builder = BlogSearchDto.builder()
                 .profileIntro(info.getProfileIntro())
-                .nickname(info.getNickname());
-        // 블로그 제목과 블로그 아이디는 필요에 따라 포함 여부를 결정
-        if (includeBlogTitle) builder.blogTitle(info.getBlogTitle());
-        if (includeBlogId)    builder.blogId(info.getBlogId());
+                .profileImageUrl(info.getProfileImageUrl())
+                .nickname(info.getNickname())
+                .blogTitle(info.getBlogTitle())
+                .blogId(info.getBlogId());
 
         return builder.build();
     }
