@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "test_neighbor")
 @Getter @NoArgsConstructor @AllArgsConstructor @Builder
-public class TestNeighbor {
+public class Neighbor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
