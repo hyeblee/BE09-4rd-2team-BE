@@ -4,7 +4,6 @@ import com.playblog.blogservice.common.ApiResponse;
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.search.dto.AllTopicResponseDto;
 import com.playblog.blogservice.search.dto.BlogSearchDto;
-import com.playblog.blogservice.search.dto.PostRequest;
 import com.playblog.blogservice.search.dto.PostSummaryDto;
 import com.playblog.blogservice.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
@@ -22,20 +21,6 @@ import java.util.List;
 @RequestMapping("/api/posts")
 public class SearchController {
     private final SearchService searchService;
-
-    /**
-     * 테스트용 게시글 작성 API
-     * @param request 게시글 작성 요청 DTO
-     * @return ResponseEntity<ApiResponse<String>> 작성 완료 메시지
-     */
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<String>> createPost(@RequestBody PostRequest request) {
-        searchService.createPost(request);
-        return ResponseEntity
-                .status(201)
-                .body(ApiResponse.success("게시글 작성 완료!"));
-    }
-
     /**
      * 모든 게시글 조회 API
      * @param page 페이지 번호 (기본값: 0)

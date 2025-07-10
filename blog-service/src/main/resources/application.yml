@@ -7,7 +7,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC 드라이버 클래스 (MySQL 8.x 표준)
-    url: jdbc:mysql://mysql.coffit.xyz:3322/vldb  # 연결할 MySQL DB URL
+    url: jdbc:mysql://mysql.macacolabs.site:3322/vldb  # 연결할 MySQL DB URL
     username: vlog  # DB 사용자 계정
     password: vlog  # DB 비밀번호
 
