@@ -2,11 +2,12 @@ package com.playblog.blogservice.comment.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentResponse {
@@ -19,7 +20,7 @@ public class CommentResponse {
     private Boolean isLiked;
     private LocalDateTime createdAt;
 
-    @Data
+    @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AuthorDto {
