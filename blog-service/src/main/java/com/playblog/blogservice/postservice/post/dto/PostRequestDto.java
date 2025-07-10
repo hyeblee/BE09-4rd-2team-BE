@@ -7,10 +7,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import com.playblog.blogservice.user.User;
+import com.playblog.blogservice.userInfo.UserInfo;
 
 @Getter
 @Setter
 public class PostRequestDto {
+    private Long userId;
 
     /**
      * 게시글 제목 (필수)
@@ -82,7 +85,7 @@ public class PostRequestDto {
      * PostRequestDto → Post Entity 변환
      * 빌더 사용: 엔티티와 동일한 필드만 매핑
      */
-    public Post toEntity() {
+    public Post toEntity(User user) {
         return Post.builder()
                 .title(title)
                 .content(content)
@@ -91,6 +94,7 @@ public class PostRequestDto {
                 .topicType(topicType)
                 .subTopic(subTopic)
                 .visibility(visibility)
+                .user(user)
                 // .tags(tags)
                 .build();
     }
