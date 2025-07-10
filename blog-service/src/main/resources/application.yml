@@ -26,3 +26,4 @@ ftp:
   pass: ${FTP_PASS}      # 환경변수로 대체
   remote-dir: /images/1
   base-url: http://dev.macacolabs.site:8008/images/1
+
