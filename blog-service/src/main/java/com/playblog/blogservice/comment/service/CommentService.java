@@ -141,6 +141,7 @@ public class CommentService {
     }
 
     /**
+     * 권한 체크 후
      * Comment Entity -> CommentResponse 변환
      */
     private CommentResponse convertToCommentResponseWithContent(Comment comment, Long requestUserId, boolean isLiked, String content) {
@@ -162,6 +163,7 @@ public class CommentService {
     }
 
     /**
+     * 작성자 본인이 수정하는 거라 권한 체크 x
      * Comment Entity -> CommentResponse 변환
      */
     private CommentResponse convertToCommentResponse(Comment comment, Long requestUserId, boolean isLiked) {

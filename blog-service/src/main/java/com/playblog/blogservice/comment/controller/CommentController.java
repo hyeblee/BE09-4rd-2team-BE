@@ -1,15 +1,16 @@
 package com.playblog.blogservice.comment.controller;
 
-import com.playblog.blogservice.comment.entity.Comment;
+import com.playblog.blogservice.comment.dto.CommentRequest;
+import com.playblog.blogservice.comment.dto.CommentResponse;
+import com.playblog.blogservice.comment.dto.CommentsResponse;
 import com.playblog.blogservice.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,63 +19,56 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    // 1. 댓글 작성
+    /**
+     * 댓글 작성
+     */
     @PostMapping("/posts/{postId}/comments")
-    public ResponseEntity<Map<String, Object>> createComment(
+    public ResponseEntity<CommentResponse> createComment(
             @PathVariable Long postId,
-            @RequestBody Map<String, Object> request
+            @RequestBody @Valid CommentRequest request
     ) {
-        String content = (String) request.get("content");
-        Boolean isSecret = (Boolean) request.getOrDefault("isSecret", false);
         // TODO: JWT 토큰에서 사용자 ID 추출 (현재는 임시로 1L)
         Long authorId = 1L;
 
-        Comment comment = commentService.createComment(postId, authorId, content, isSecret);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("commentId", comment.getId());
-        response.put("message", "댓글이 작성되었습니다");
+        CommentResponse response = commentService.createComment(postId, request, authorId);
 
         return ResponseEntity.ok(response);
     }
 
-    // 2. 댓글 목록 조회
+    /**
+     * 댓글 목록 조회
+     */
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<Map<String, Object>> getComments(@PathVariable Long postId) {
-
+    public ResponseEntity<CommentsResponse> getComments(@PathVariable Long postId) {
+        // TODO: JWT 토큰에서 사용자 ID 추출
         Long requestUserId = 1L;
+        // TODO: Post Service에서 게시글 작성자 ID 가져오기
         Long postAuthorId = 1L;
 
-        List<Map<String, Object>> commentList = commentService.getCommentsWithDetails(postId, requestUserId, postAuthorId);
-
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("comments", commentList);
-        response.put("totalCount", commentList.size());
+        CommentsResponse response = commentService.getCommentsByPostId(postId, requestUserId, postAuthorId);
 
         return ResponseEntity.ok(response);
     }
 
-    // 3. 댓글 수정
+    /**
+     * 댓글 수정
+     */
     @PutMapping("/comments/{commentId}")
-    public ResponseEntity<Map<String, Object>> updateComment(
+    public ResponseEntity<CommentResponse> updateComment(
             @PathVariable Long commentId,
-            @RequestBody Map<String, Object> request
+            @RequestBody @Valid CommentRequest request
     ) {
-        String content = (String) request.get("content");
         // TODO: JWT 토큰에서 사용자 ID 추출
         Long requestUserId = 1L;
 
-        Comment updatedComment = commentService.updateComment(commentId, content, requestUserId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("commentId", updatedComment.getId());
-        response.put("message", "댓글이 수정되었습니다");
+        CommentResponse response = commentService.updateComment(commentId, request, requestUserId);
 
         return ResponseEntity.ok(response);
     }
 
-    // 4. 댓글 삭제
+    /**
+     * 댓글 삭제
+     */
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
         // TODO: JWT 토큰에서 사용자 ID 추출
@@ -82,6 +76,19 @@ public class CommentController {
 
         commentService.deleteComment(commentId, requestUserId);
 
-        return ResponseEntity.noContent().build(); // HTTP 204
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 댓글 수 조회 (Post Service용)
+     */
+    @GetMapping("/posts/{postId}/comments/count")
+    public ResponseEntity<Map<String, Object>> getCommentCount(@PathVariable Long postId) {
+        Long count = commentService.getCommentCount(postId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("count", count);
+
+        return ResponseEntity.ok(response);
     }
 }

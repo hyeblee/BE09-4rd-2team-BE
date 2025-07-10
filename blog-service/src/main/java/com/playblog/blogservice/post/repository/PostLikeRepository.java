@@ -22,9 +22,6 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
     // 게시글에 공감한 사용자 목록 (최신순)
     List<PostLike> findByPostIdOrderByCreatedAtDesc(Long postId);
 
-    // 공감한 게시글 목록 (최신순)
-    List<PostLike> findByUserIdOrderByCreatedAtDesc(Long userId);
-
     // 게시글 공감 삭제
     void deleteByPostIdAndUserId(Long postId, Long userId);
 }

@@ -1,10 +1,7 @@
 package com.playblog.blogservice.comment.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "comments")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {
