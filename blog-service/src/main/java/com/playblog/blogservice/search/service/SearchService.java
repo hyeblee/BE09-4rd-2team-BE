@@ -6,9 +6,11 @@ import com.playblog.blogservice.common.exception.ErrorCode;
 import com.playblog.blogservice.common.exception.SearchException;
 import com.playblog.blogservice.search.dto.*;
 import com.playblog.blogservice.search.entity.TestPost;
+import com.playblog.blogservice.search.entity.TestUser;
+import com.playblog.blogservice.search.entity.TestUserInfo;
 import com.playblog.blogservice.search.repository.*;
 import com.playblog.blogservice.user.User;
-import com.playblog.blogservice.userInfo.UserInfo;
+//import com.playblog.blogservice.userInfo.UserInfo;
 import com.playblog.blogservice.userInfo.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,25 +32,8 @@ public class SearchService {
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
-    private final UserInfoRepository userInfoRepository;
+    private final TestUserInfoRepository userInfoRepository;
     private final NeighborRepository neighborRepository;
-
-    // 조회 테스트용 게시글 생성
-    public void createPost(PostRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new SearchException(ErrorCode.USER_NOT_FOUND));
-        TestPost testPost = TestPost.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .PublishedAt(LocalDateTime.now())
-                .thumbnailImageUrl(request.getThumbnailImageUrl())
-                .imageUrls(request.getImageUrls())
-                .subTopic(request.getSubTopic())
-                .user(user)
-                .build();
-        searchRepository.save(testPost);
-    }
-
 
     // 모든 게시글 조회
     @Transactional(readOnly = true)
@@ -76,24 +61,32 @@ public class SearchService {
 
     // 모든 주제 정보 가져오기
     public List<AllTopicResponseDto> getAllTopics() {
+        // SubTopic들을 TopicType별로 그룹화
         Map<TopicType, List<SubTopic>> groupedTopics = Arrays.stream(SubTopic.values())
                 .collect(Collectors.groupingBy(SubTopic::getTopicType));
 
+        // TopicType 기준으로 AllTopicResponseDto 리스트 만들기
         return Arrays.stream(TopicType.values())
                 .map(topicType -> {
-                    List<SubTopicResponseDto> subTopicResponses =  groupedTopics.getOrDefault(topicType, List.of())
+                    // 이 TopicType에 해당하는 SubTopic 리스트를 꺼내서, 각 subTopic에 대해 Dto 생성
+                    List<SubTopicResponseDto> subTopicDtos = groupedTopics.getOrDefault(topicType, List.of())
                             .stream()
-                            .map(sub -> new SubTopicResponseDto(sub.name(), sub.getTopicName()))
+                            .map(sub -> new SubTopicResponseDto(
+                                    sub.name(),        // "subTopic" : Enum 이름
+                                    sub.getSubtopicName() // "subTopicName" : 한글명칭
+                            ))
                             .toList();
 
+                    // AllTopicResponseDto 생성 (각 topicType마다)
                     return new AllTopicResponseDto(
-                            topicType.name(),
-                            topicType.getMainTopic(),
-                            subTopicResponses
+                            topicType.name(),           // "topicType": "ENTERTAIN" 등
+                            topicType.getTopicTypeName(), // "topicName": "엔터테인먼트.예술" 등
+                            subTopicDtos                  // "subTopics"
                     );
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
+
 
     // 특정 주제에 해당하는 게시글 조회
     @Transactional(readOnly = true)
@@ -169,8 +162,8 @@ public class SearchService {
                 ));
         return testPosts.stream()
                 .map(testPost -> {
-                    User user = testPost.getUser();
-                    UserInfo info = userInfoRepository
+                    TestUser user = testPost.getUser();
+                    TestUserInfo info = userInfoRepository
                             .findByUser(user)
                             .orElseThrow(() -> new SearchException(ErrorCode.USER_NOT_FOUND));
 
@@ -191,7 +184,7 @@ public class SearchService {
                 .toList();
     }
 
-    private BlogSearchDto toBlogSearchDto(UserInfo info) {
+    private BlogSearchDto toBlogSearchDto(TestUserInfo info) {
         BlogSearchDto.BlogSearchDtoBuilder builder = BlogSearchDto.builder()
                 .profileIntro(info.getProfileIntro())
                 .profileImageUrl(info.getProfileImageUrl())
