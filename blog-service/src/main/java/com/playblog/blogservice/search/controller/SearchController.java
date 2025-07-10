@@ -6,7 +6,6 @@ import com.playblog.blogservice.search.dto.AllTopicResponseDto;
 import com.playblog.blogservice.search.dto.BlogSearchDto;
 import com.playblog.blogservice.search.dto.PostRequest;
 import com.playblog.blogservice.search.dto.PostSummaryDto;
-import com.playblog.blogservice.search.entity.Post;
 import com.playblog.blogservice.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

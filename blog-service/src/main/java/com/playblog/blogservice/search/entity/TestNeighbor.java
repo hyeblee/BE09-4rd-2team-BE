@@ -1,17 +1,16 @@
-package com.playblog.blogservice.common.entity;
+package com.playblog.blogservice.search.entity;
 
+import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "test_neighbor")
 @Getter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Neighbor {
+public class TestNeighbor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

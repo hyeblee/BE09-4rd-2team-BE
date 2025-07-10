@@ -1,32 +1,28 @@
 package com.playblog.blogservice.search.entity;
 
-import com.playblog.blogservice.common.entity.User;
+import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
+
 @Entity
-@Table(name = "test_comments")
+@Table(name="test_post_likes")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Comment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class TestPostLike {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+    private TestPost testPost;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @Column(nullable = false)
-    private String content;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
