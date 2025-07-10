@@ -49,6 +49,7 @@ public class SearchService {
         searchRepository.save(testPost);
     }
 
+
     // 모든 게시글 조회
     @Transactional(readOnly = true)
     public Page<PostSummaryDto> getAllPosts(Pageable pageable) {
