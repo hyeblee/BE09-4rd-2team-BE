@@ -37,4 +37,20 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+    /* 게시글 수정 */
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostResponseDto> updatePost(
+            @PathVariable Long postId,
+            @RequestBody @Valid PostRequestDto requestDto) {
+        PostResponseDto response = postService.updatePost(postId, requestDto);
+        return ResponseEntity.ok(response);
+    }
+
+    /* 게시글 삭제 */
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
+        postService.deletePost(postId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

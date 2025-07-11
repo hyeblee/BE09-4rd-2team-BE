@@ -19,5 +19,5 @@ public enum SubTopic {
     HEALTH("건강.의학", TopicType.KNOWLEDGE);
 
     private final String subtopicName;
-    private final TopicType topicType;
+    private final TopicType mainTopic;
 }

@@ -94,7 +94,7 @@ public class PostRequestDto {
                 .content(content)
                 .thumbnailImageUrl(thumbnailImageUrl)
                 .category(category)
-                .topicType(mainTopic)
+                .mainTopic(mainTopic)
                 .subTopic(subTopic)
                 .visibility(visibility)
                 .user(user)

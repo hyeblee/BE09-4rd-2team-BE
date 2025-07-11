@@ -1,5 +1,7 @@
 package com.playblog.blogservice.postservice.post.dto;
 
+import com.playblog.blogservice.common.entity.SubTopic;
+import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.postservice.post.entity.Post;
 import com.playblog.blogservice.postservice.post.entity.PostPolicy;
 import com.playblog.blogservice.postservice.post.entity.PostVisibility;
@@ -33,6 +35,11 @@ public class PostResponseDto {
     /* 좋아요 정보 */
     private Long likeCount;            // 댓글 수
     private Boolean isLiked;           // 댓글 공감 수
+
+    /* Update에 들어갈 추가 Dto */
+    private TopicType mainTopic;
+    private SubTopic subTopic;
+    private String thumbnailImageUrl;
 
     /* 댓글 리스트 */
 //    private List<CommentResponse> comments; // 댓글 리스트
@@ -71,6 +78,21 @@ public class PostResponseDto {
                 .profileImageUrl(userInfo != null ? userInfo.getProfileImageUrl() : null)
                 .likeCount(likeCount != null ? likeCount : 0L)
                 .isLiked(isLiked)
+                .build();
+    }
+
+    public static PostResponseDto fromEntity(Post post) {
+        return PostResponseDto.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .visibility(post.getVisibility())
+                .allowComment(post.getAllowComment())
+                .allowLike(post.getAllowLike())
+                .allowSearch(post.getAllowSearch())
+                .thumbnailImageUrl(post.getThumbnailImageUrl())
+                .mainTopic(post.getMainTopic())
+                .subTopic(post.getSubTopic())
                 .build();
     }
 
