@@ -1,4 +1,4 @@
-package com.playblog.userservice.neighbor.Entity;
+package com.playblog.blogservice.neighbor.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

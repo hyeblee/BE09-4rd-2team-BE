@@ -1,9 +1,9 @@
-package com.playblog.userservice.neighbor.dto;
+package com.playblog.blogservice.neighbor.dto;
 
 
-import com.playblog.userservice.neighbor.Entity.Neighbor;
-import com.playblog.userservice.neighbor.Entity.NeighborStatus;
-import com.playblog.userservice.neighbor.Entity.UserInfo;
+import com.playblog.blogservice.neighbor.Entity.Neighbor;
+import com.playblog.blogservice.neighbor.Entity.NeighborStatus;
+import com.playblog.blogservice.neighbor.Entity.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static com.playblog.userservice.neighbor.Entity.NeighborStatus.ACCEPTED;
+import static com.playblog.blogservice.neighbor.Entity.NeighborStatus.ACCEPTED;
 
 @Getter
 @NoArgsConstructor

@@ -1,6 +1,6 @@
-package com.playblog.userservice.neighbor.Entity;
+package com.playblog.blogservice.neighbor.Entity;
 
-import com.playblog.userservice.user.User;
+import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

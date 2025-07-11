@@ -1,8 +1,8 @@
-package com.playblog.userservice.neighbor.Repository;
+package com.playblog.blogservice.neighbor.Repository;
 
-import com.playblog.userservice.neighbor.Entity.Neighbor;
-import com.playblog.userservice.neighbor.Entity.NeighborStatus;
-import com.playblog.userservice.neighbor.Entity.UserInfo;
+import com.playblog.blogservice.neighbor.Entity.Neighbor;
+import com.playblog.blogservice.neighbor.Entity.NeighborStatus;
+import com.playblog.blogservice.neighbor.Entity.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
