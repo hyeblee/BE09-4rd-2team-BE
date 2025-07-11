@@ -5,13 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class MyAddedToMeNeighborDto {
-    private String blogTitle;
+    private Long Id;
     private String nickname;
-    protected LocalDateTime followedAt;
+    private String profileIntro;
+    //    private LocalDate createdAt;
+    protected LocalDate requestedAt;
+    private String status;
+    private boolean isMutual;
 }

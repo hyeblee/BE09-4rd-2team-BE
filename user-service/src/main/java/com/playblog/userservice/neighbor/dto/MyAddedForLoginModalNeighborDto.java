@@ -1,15 +1,15 @@
 package com.playblog.userservice.neighbor.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReceivedMutualNeighborDto {
-    private String blogId;
-    protected LocalDate requestedAt;
+public class MyAddedForLoginModalNeighborDto {
+    private Long UserId;
+    private String blogTitle;
+    private String profileImageUrl;
 }

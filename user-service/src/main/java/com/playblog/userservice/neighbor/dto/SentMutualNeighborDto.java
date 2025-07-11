@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @Getter
 @NoArgsConstructor
 public class SentMutualNeighborDto{
     private String blogId;
-    protected LocalDateTime requestedAt;
+    protected LocalDate requestedAt;
 }

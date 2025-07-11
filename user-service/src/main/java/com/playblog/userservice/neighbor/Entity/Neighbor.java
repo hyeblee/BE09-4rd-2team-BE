@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,19 +27,18 @@ public class Neighbor {
     @JoinColumn(name="to_user_info_id")
     private UserInfo toUserInfo;
 
-    LocalDateTime followedAt;
+    LocalDate followedAt;
 
-    LocalDateTime requestedAt;
+    LocalDate requestedAt;
 
     @Enumerated(EnumType.STRING)
     private NeighborStatus status;
 
-
-    public void setFollowedAt(Object o) {
-    }
-
-
     public void setStatus(NeighborStatus neighborStatus) {
         this.status = neighborStatus;
+    }
+
+    public void setFollowedAt(LocalDate now) {
+
     }
 }

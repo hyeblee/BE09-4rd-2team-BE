@@ -15,11 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.playblog.userservice.neighbor.Entity.NeighborStatus.*;
+import static javax.management.Query.in;
 
 @Service
 @RequiredArgsConstructor
@@ -86,7 +88,6 @@ public class NeighborService {
             case ACCEPTED -> {
                 Optional<Neighbor> reverse = neighborRepository.findByFromUserInfoAndToUserInfo(myInfo,deleteUser);
                 neighbor.setStatus(REJECTED);
-                Neighbor reverseNeighborRelation = reverse.orElse(null);
                 neighborRepository.save(neighbor);
             }
             default -> {
@@ -95,65 +96,92 @@ public class NeighborService {
         }
     }
     // 이웃 신청
-    public NeighborDto acceptNeighbor(Long fromUserId,Long toUserId) {
-        UserInfo toUser = userInfoRepository.findById(toUserId).orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다"));
-        UserInfo fromUser = userInfoRepository.findById(fromUserId).orElseThrow(() -> new RuntimeException("User not found"));
+    public List<NeighborDto> acceptNeighbor(Long fromUserId, List<Long> toUserIds) {
+        UserInfo fromUser = userInfoRepository.findById(fromUserId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다"));
 
-        if (fromUser.getId().equals(toUser.getId())) {
-            throw new RuntimeException("자기 자신에게 이웃 요청을 보낼 수 없습니다");
-        }
-        Optional<Neighbor> existing = neighborRepository.findByFromUserInfoAndToUserInfo(fromUser,toUser);
-        if(existing.isPresent()) {
-            throw new RuntimeException("이미 요청을 보냈습니다");
-        }
-        if(existing.isPresent() && existing.get().getStatus() == REMOVED) {
-            throw new RuntimeException("기존에 차단한 이웃입니다.");
-        }
-        Optional<Neighbor> reverse = neighborRepository.findByFromUserInfoAndToUserInfo(toUser,fromUser);
-        NeighborStatus status = reverse.map( n -> n.getStatus() == REQUESTED || n.getStatus()==ACCEPTED || n.getStatus() == REJECTED ? ACCEPTED : REJECTED).orElse(REQUESTED);
+        List<NeighborDto> results = new ArrayList<>();
 
-        Neighbor neighbor = Neighbor.builder()
-                .fromUserInfo(fromUser)
-                .toUserInfo(toUser)
-                .followedAt(status == ACCEPTED ? LocalDateTime.now() : null)
-                .requestedAt(LocalDateTime.now())
-                .status(status)
-                .build();
-        Neighbor saved = neighborRepository.save(neighbor);
+        for (Long toUserId : toUserIds) {
+            if (fromUserId.equals(toUserId)) {
+                // 자기 자신에게 요청 → 건너뜀
+                continue;
+            }
 
-        // 상대가 먼저 팔로우한 상태라면 상대방의 상태도 ACCEPTED로 바꿔줌 → 진짜 서로이웃 상태
-        if (status == ACCEPTED && reverse.isPresent() && reverse.get().getStatus() == REQUESTED) {
-            Neighbor other = reverse.get();
-            other.setStatus(ACCEPTED);
-            other.setFollowedAt(LocalDateTime.now());
-            neighborRepository.save(other);
+            try {
+                UserInfo toUser = userInfoRepository.findById(toUserId)
+                        .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다: " + toUserId));
+
+                Optional<Neighbor> existing = neighborRepository.findByFromUserInfoAndToUserInfo(fromUser, toUser);
+                if (existing.isPresent()) {
+                    Neighbor ex = existing.get();
+                    switch (ex.getStatus()) {
+                        case REJECTED:
+                            neighborRepository.delete(ex); // 삭제 후 새로 생성
+                        case REMOVED:
+                            continue; // 차단된 경우 → 건너뜀
+                        default:
+                            continue; // 이미 존재하는 경우 → 건너뜀
+                    }
+                }
+
+                Optional<Neighbor> reverse = neighborRepository.findByFromUserInfoAndToUserInfo(toUser, fromUser);
+                NeighborStatus status = reverse.map(n -> n.getStatus() == ACCEPTED ? ACCEPTED : REQUESTED)
+                        .orElse(REQUESTED);
+
+                Neighbor neighbor = Neighbor.builder()
+                        .fromUserInfo(fromUser)
+                        .toUserInfo(toUser)
+                        .requestedAt(LocalDate.now())
+                        .followedAt(status == ACCEPTED ? LocalDate.now() : null)
+                        .status(status)
+                        .build();
+
+                Neighbor saved = neighborRepository.save(neighbor);
+
+                // 상대방도 요청했었다면 → 서로이웃으로 갱신
+                if (status == ACCEPTED && reverse.isPresent() && reverse.get().getStatus() == REQUESTED) {
+                    Neighbor other = reverse.get();
+                    other.setStatus(ACCEPTED);
+                    other.setFollowedAt(LocalDate.now());
+                    neighborRepository.save(other);
+                }
+
+                results.add(NeighborDto.from(saved, reverse.orElse(null)));
+
+            } catch (Exception e) {
+                // 개별 예외는 로그 남기고 계속 진행
+                System.err.println("이웃 추가 실패 (userId: " + toUserId + ") - " + e.getMessage());
+            }
         }
-        return NeighborDto.fromWithoutLogin(saved);
+
+        return results;
     }
+
 
     // 내가 추가한 이웃 조회
     public List<Neighbor> getAddedForMeNeighbors(Long userId) {
         UserInfo me = userInfoRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다"));
 
-        return neighborRepository.findByFromUserInfoAndStatus(me, NeighborStatus.ACCEPTED);
+        return neighborRepository.findByFromUserInfoAndStatusIn(me,   List.of(NeighborStatus.ACCEPTED, NeighborStatus.REQUESTED));
     }
     // 나를 추가한 이웃 조회
     public List<Neighbor> getAddedToMeNeighbors(Long userId) {
         UserInfo me = userInfoRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다"));
 
-        return neighborRepository.findByToUserInfoAndStatus(me, NeighborStatus.ACCEPTED);
+        return neighborRepository.findByToUserInfoAndStatusIn(me, List.of(NeighborStatus.ACCEPTED, NeighborStatus.REQUESTED));
     }
     // 서로이웃 받은 신청
-    public List<Neighbor> getReceivedMutualNeighbors(Long userId) {
+    public List<Neighbor> getSentMutualNeighbors(Long userId) {
         UserInfo me = userInfoRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다"));
 
         return neighborRepository.findByFromUserInfoAndStatus(me, REQUESTED);
     }
     // 서로이웃 보낸 신청
-    public List<Neighbor> getSentMutualNeighbors(Long userId) {
+    public List<Neighbor> getReceivedMutualNeighbors(Long userId) {
         UserInfo me = userInfoRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다"));
 
@@ -180,7 +208,7 @@ public class NeighborService {
             if (reverse.isPresent()) {
                 Neighbor back = reverse.get();
                 back.setStatus(NeighborStatus.ACCEPTED);
-                back.setFollowedAt(LocalDateTime.now());
+                back.setFollowedAt(LocalDate.now());
             }
         }
     }
@@ -194,7 +222,55 @@ public class NeighborService {
             if(relation.get().getStatus() == REQUESTED){
                 relation.get().setStatus(REJECTED);
             }
+
         }
 
     }
+    @Transactional
+    public void rejectAllRelationNeighbor(Long userId, Long deleteUserId) {
+        UserInfo me = userInfoRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        UserInfo other = userInfoRepository.findById(deleteUserId).orElseThrow(() -> new RuntimeException("User not found"));
+        Optional<Neighbor> relation  = neighborRepository.findByFromUserInfoAndToUserInfo(me,other);
+        if(relation.isPresent()) {
+            neighborRepository.delete(relation.get());
+        }
+    }
+    @Transactional
+    public void changeRelationNeighbor(Long userId, List<Long> changeUserId) {
+        UserInfo me = userInfoRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        for(Long id : changeUserId) {
+            UserInfo other = userInfoRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+            Optional<Neighbor> relation  = neighborRepository.findByFromUserInfoAndToUserInfo(other,me);
+            if(relation.get().getStatus() == ACCEPTED){
+                relation.get().setStatus(REJECTED);
+            }
+        }
+    }
+
+    public List<Neighbor> getReverseNeighbors(List<UserInfo> fromUsers, Long toUserId) {
+        UserInfo toUser = userInfoRepository.findById(toUserId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다"));
+        return neighborRepository.findAllByFromUserInfoInAndToUserInfo(fromUsers, toUser);
+    }
+
+    public Map<Long, Neighbor> getReverseNeighborMap(List<Neighbor> neighbors, Long userId) {
+        List<Long> fromUserIds = neighbors.stream()
+                .map(n -> n.getFromUserInfo().getId())
+                .distinct()
+                .toList();
+
+        List<Neighbor> reverseList = neighborRepository.findByFromUserInfoIdInAndToUserInfoIdAndStatus(
+                fromUserIds,
+                userId,
+                NeighborStatus.ACCEPTED
+        );
+
+        return reverseList.stream()
+                .collect(Collectors.toMap(
+                        n -> n.getFromUserInfo().getId(),
+                        n -> n,
+                        (existing, duplicate) -> existing
+                ));
+    }
 }
+

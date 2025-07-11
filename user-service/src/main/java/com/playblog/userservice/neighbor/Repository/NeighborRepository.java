@@ -18,7 +18,15 @@ public interface NeighborRepository extends JpaRepository<Neighbor,Long> {
 
     Optional<Neighbor> findByFromUserInfoAndToUserInfo(UserInfo id, UserInfo deleteUserId);
 
+    List<Neighbor> findByToUserInfoAndStatus(UserInfo me, NeighborStatus neighborStatus);
+
+    List<Neighbor> findAllByFromUserInfoInAndToUserInfo(List<UserInfo> fromUsers, UserInfo toUser);
+
     List<Neighbor> findByFromUserInfoAndStatus(UserInfo me, NeighborStatus neighborStatus);
 
-    List<Neighbor> findByToUserInfoAndStatus(UserInfo me, NeighborStatus neighborStatus);
+    List<Neighbor> findByFromUserInfoAndStatusIn(UserInfo me, List<NeighborStatus> accepted);
+
+    List<Neighbor> findByToUserInfoAndStatusIn(UserInfo me, List<NeighborStatus> accepted);
+
+    List<Neighbor> findByFromUserInfoIdInAndToUserInfoIdAndStatus(List<Long> attr0, Long attr1, NeighborStatus status);
 }
