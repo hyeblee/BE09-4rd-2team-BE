@@ -4,6 +4,7 @@ import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.common.exception.ErrorCode;
 import com.playblog.blogservice.common.exception.SearchException;
+import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
 import com.playblog.blogservice.postservice.post.entity.Post;
 import com.playblog.blogservice.search.dto.*;
 import com.playblog.blogservice.search.repository.*;
