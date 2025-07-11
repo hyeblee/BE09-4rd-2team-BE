@@ -11,7 +11,7 @@ public enum SubTopic {
     THOUGHTS("일상, 생각", TopicType.LIFE),
     MARRIAGE("육아.결혼", TopicType.LIFE),
     PETS("반려동물", TopicType.LIFE),
-    GAME("게임", TopicType.HOBBY),
+    GAMES("게임", TopicType.HOBBY),
     SPORTS("스포츠", TopicType.HOBBY),
     PHOTO("사진", TopicType.HOBBY),
     COMPUTER("IT.컴퓨터", TopicType.KNOWLEDGE),
