@@ -29,6 +29,7 @@ public class NeighborController {
     private final NeighborDtoMapper neighborDtoMapper;
     private final UserInfoRepository userInfoRepository;
 
+
     // 내가 요청한 이웃(내가 추가)
     @GetMapping("/my-following/added")
     @Operation(summary = "내가 추가 이웃", description = "내가 이웃을 요청한 이웃 목록들을 보여줍니다.")
