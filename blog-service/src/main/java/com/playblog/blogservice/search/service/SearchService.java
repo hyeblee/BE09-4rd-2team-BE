@@ -126,25 +126,24 @@ public class SearchService {
         return result;
     }
 
-
-//    // 이웃 게시글 조회
-//    @Transactional(readOnly = true)
-//    public Page<PostSummaryDto> getNeighborPosts(Long myUserinfoId, Pageable pageable) {
-//        if (myUserinfoId == null) {
-//            throw new SearchException(ErrorCode.INVALID_PARAMETER);
-//        }
-//        // 1. 이웃 userId 리스트 조회
-//        List<Long> neighborUserIds = neighborRepository.findFollowingUserInfoIdsByUserInfoId(myUserinfoId);
-//        if (neighborUserIds == null || neighborUserIds.isEmpty()) {
-//            throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
-//        }
-//        // 2. 이웃 userId로 최신 게시글 목록 조회 (페이징)
-//        Page<Post> posts = searchRepository.findByUserIdInOrderByPublishedAtDesc(neighborUserIds, pageable);
-//        // 3. DTO로 변환 (공통 메소드 활용)
-//        List<PostSummaryDto> result = convertToPostSummaryDtos(posts.getContent());
-//        // 4. PageImpl로 래핑해서 반환
-//        return new PageImpl<>(result, pageable, posts.getTotalElements());
-//    }
+    // 이웃 게시글 조회
+    @Transactional(readOnly = true)
+    public Page<PostSummaryDto> getNeighborPosts(Long myUserId, Pageable pageable) {
+        if (myUserId == null) {
+            throw new SearchException(ErrorCode.INVALID_PARAMETER);
+        }
+        // 1. 이웃 userId 리스트 조회
+        List<Long> neighborUserIds = neighborRepository.findFollowingUserIdsById(myUserId);
+        if (neighborUserIds == null || neighborUserIds.isEmpty()) {
+            throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
+        }
+        // 2. 이웃 userId로 최신 게시글 목록 조회 (페이징)
+        Page<Post> posts = searchRepository.findByUserIdInOrderByPublishedAtDesc(neighborUserIds, pageable);
+        // 3. DTO로 변환 (공통 메소드 활용)
+        List<PostSummaryDto> result = convertToPostSummaryDtos(posts.getContent());
+        // 4. PageImpl로 래핑해서 반환
+        return new PageImpl<>(result, pageable, posts.getTotalElements());
+    }
 
     // 좋아요 수, 댓글 수 집계 후 PostSummaryDto로 변환하는 공통 메서드
     private List<PostSummaryDto> convertToPostSummaryDtos(List<Post> posts) {
@@ -178,7 +177,7 @@ public class SearchService {
                             .profileImageUrl(info.getProfileImageUrl())
                             .likeCount(likeCounts.getOrDefault(post.getId(), 0L))
                             .commentCount(commentCounts.getOrDefault(post.getId(), 0L))
-                            .createdAt(post.getPublishedAt())
+                            .publishedAt(post.getPublishedAt())
                             .subTopic(subTopic)
                             .subTopicName(subTopicName)
                             .build();
