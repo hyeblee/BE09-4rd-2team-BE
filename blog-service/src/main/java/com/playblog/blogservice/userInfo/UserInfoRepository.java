@@ -19,6 +19,6 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
             "OR u.blogId LIKE %:nickname%")
     List<UserInfo> findByNicknameOrBlogId(String nickname);
 
-    // UserId로 UserInfo 조회
+    //     User 정보로 UserInfo 조회
     Optional<UserInfo> findByUser(User user);
 }
