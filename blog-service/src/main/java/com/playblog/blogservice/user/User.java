@@ -1,31 +1,25 @@
 package com.playblog.blogservice.user;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;  // 추가
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.playblog.blogservice.userInfo.UserInfo;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "user")  // 여기서 테이블명 명시
 public class User {
+
+  // FK
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_info_id")
+  private UserInfo userInfo;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

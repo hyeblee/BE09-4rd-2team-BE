@@ -14,6 +14,10 @@ import com.playblog.blogservice.user.User;
 @Setter(AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
+    /* 정책 참조 */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "policy_id")
+    private PostPolicy postPolicy;
 
     /* 유저 참조 */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -61,6 +65,7 @@ public class Post {
     /* 발행 시각 */
     @CreationTimestamp // 엔터티 생성 시 현재 시간 자동 저장
     private LocalDateTime publishedAt;
+
 //    /* 태그 */
 //    @ElementCollection(fetch = FetchType.EAGER) // 간단한 값들의 컬렉션을 매핑
 //    @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
