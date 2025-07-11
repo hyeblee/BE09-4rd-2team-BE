@@ -1,28 +1,45 @@
 package com.playblog.blogservice.search.entity;
 
-import com.playblog.blogservice.user.User;
+import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "neighbor")
-@Getter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Neighbor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    // 본인 (이웃을 추가한 사람)
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="from_user_info_id")
+    private UserInfo fromUserInfo;
 
-    // 이웃 (추가된 대상)
-    @ManyToOne
-    @JoinColumn(name = "neighbor_id", nullable = false)
-    private User neighbor;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="to_user_info_id")
+    private UserInfo toUserInfo;
+
+    LocalDate followedAt;
+
+    LocalDate requestedAt;
+
+    @Enumerated(EnumType.STRING)
+    private NeighborStatus status;
+
+    public void setStatus(NeighborStatus neighborStatus) {
+        this.status = neighborStatus;
+    }
+
+    public void setFollowedAt(LocalDate now) {
+
+    }
 }
-

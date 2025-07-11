@@ -131,7 +131,7 @@ public class SearchService {
             throw new SearchException(ErrorCode.INVALID_PARAMETER);
         }
         // 1. 이웃 userId 리스트 조회
-        List<Long> neighborUserIds = neighborRepository.findFollowingUserIdsByUserId(myUserId);
+        List<Long> neighborUserIds = neighborRepository.findFollowingUserInfoIdsByUserInfoId(myUserId);
         if (neighborUserIds == null || neighborUserIds.isEmpty()) {
             throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
         }
