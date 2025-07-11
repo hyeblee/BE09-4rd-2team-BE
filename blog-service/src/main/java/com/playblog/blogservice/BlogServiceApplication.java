@@ -9,17 +9,24 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = {
         "com.playblog.blogservice.comment",
-        "com.playblog.blogservice.post",
-        "com.playblog.blogservice.common"
+        "com.playblog.blogservice.postlike",
+        "com.playblog.blogservice.common",
+        "com.playblog.blogservice.userInfo",
+        "com.playblog.blogservice.user"
 })
 @EnableJpaAuditing
 @EntityScan(basePackages = {
         "com.playblog.blogservice.comment.entity",
-        "com.playblog.blogservice.post.entity"
+        "com.playblog.blogservice.postlike.entity",
+        "com.playblog.blogservice.user",
+        "com.playblog.blogservice.userInfo",
+
 })
 @EnableJpaRepositories(basePackages = {
         "com.playblog.blogservice.comment.repository",
-        "com.playblog.blogservice.post.repository"
+        "com.playblog.blogservice.postlike.repository",
+        "com.playblog.blogservice.common.repository",
+        "com.playblog.blogservice.userInfo"
 })
 public class BlogServiceApplication {
 

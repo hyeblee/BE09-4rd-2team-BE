@@ -1,10 +1,10 @@
-package com.playblog.blogservice.post.service;
+package com.playblog.blogservice.postlike.service;
 
-import com.playblog.blogservice.post.dto.PostLikeResponse;
-import com.playblog.blogservice.post.dto.PostLikeUserResponse;
-import com.playblog.blogservice.post.dto.PostLikesResponse;
-import com.playblog.blogservice.post.entity.PostLike;
-import com.playblog.blogservice.post.repository.PostLikeRepository;
+import com.playblog.blogservice.postlike.dto.PostLikeResponse;
+import com.playblog.blogservice.postlike.dto.PostLikeUserResponse;
+import com.playblog.blogservice.postlike.dto.PostLikesResponse;
+import com.playblog.blogservice.postlike.entity.PostLike;
+import com.playblog.blogservice.postlike.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.playblog.blogservice.post.entity;
+package com.playblog.blogservice.postlike.entity;
 
 import jakarta.persistence.*;
         import lombok.AccessLevel;

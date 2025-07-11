@@ -1,8 +1,8 @@
-package com.playblog.blogservice.post.controller;
+package com.playblog.blogservice.postlike.controller;
 
-import com.playblog.blogservice.post.dto.PostLikeResponse;
-import com.playblog.blogservice.post.dto.PostLikesResponse;
-import com.playblog.blogservice.post.service.PostLikeService;
+import com.playblog.blogservice.postlike.dto.PostLikeResponse;
+import com.playblog.blogservice.postlike.dto.PostLikesResponse;
+import com.playblog.blogservice.postlike.service.PostLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

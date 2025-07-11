@@ -3,6 +3,10 @@ package com.playblog.blogservice.comment.service;
 import com.playblog.blogservice.comment.dto.*;
 import com.playblog.blogservice.comment.entity.Comment;
 import com.playblog.blogservice.comment.repository.CommentRepository;
+import com.playblog.blogservice.common.repository.UserRepository;
+import com.playblog.blogservice.user.User;
+import com.playblog.blogservice.userInfo.UserInfoService;
+import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,22 +21,27 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final CommentLikeService commentLikeService;
+    private final UserRepository userRepository;
+    private final UserInfoService userInfoService;
 
     /**
      * 댓글 작성
      */
     @Transactional
-    public CommentResponse createComment(Long postId, CommentRequest request, Long authorId) {
+    public CommentResponse createComment(Long postId, CommentRequest request, Long userId) {
+        // DB에서 실제 User가 존재하는지 확인
+        User author = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
         Comment comment = Comment.builder()
                 .postId(postId)
-                .authorId(authorId)
+                .author(author)
                 .content(request.getContent())
                 .isSecret(request.getIsSecret())
                 .build();
 
         Comment savedComment = commentRepository.save(comment);
 
-        return convertToCommentResponse(savedComment, authorId, false);
+        return convertToCommentResponse(savedComment, userId, false);
     }
 
     /**
@@ -139,17 +148,48 @@ public class CommentService {
         }
         return "비밀댓글입니다";
     }
+    /**
+     * 실제 사용자 정보 조회(안전한 예외처리 포함)
+     */
+    private CommentResponse.AuthorDto getUserAuthorInfo(Long authorId) {
+        try {
+            UserInfoResponse userInfo = userInfoService.getUserInfo(authorId);
+            return new CommentResponse.AuthorDto(
+                    authorId,
+                    userInfo.getNickname() != null ? userInfo.getNickname() : "사용자",
+                    "https://api.pravatar.cc/150?img=" + (authorId % 50) // ← 임시 이미지
+            );
+        } catch (Exception e) {
+            // 탈퇴한 사용자인 경우
+            return new CommentResponse.AuthorDto(
+                    authorId,
+                    "탈퇴한 사용자",
+                    "https://api.pravatar.cc/150?img=" + (authorId % 50)
+            );
+        }
+    }
+
+    /**
+     * 프로필 이미지 URL 처리 (파일 서버 문제 대응)
+     */
+//    private String getProfileImageUrl(String profileImageUrl, Long userId) {
+//
+//        if(profileImageUrl == null || profileImageUrl.isEmpty()) {
+//            return "https://api.pravatar.cc/150?img=" + (userId % 50);
+//        }
+//
+//        // TODO: 파일 서버 문제 해결되면 실제 URL 사용
+//        // 현재는 파일 서버 이슈로 임시 이미지 사용
+//        return "https://api.pravatar.cc/150?img=" + (userId % 50);
+//    }
 
     /**
      * 권한 체크 후
      * Comment Entity -> CommentResponse 변환
      */
     private CommentResponse convertToCommentResponseWithContent(Comment comment, Long requestUserId, boolean isLiked, String content) {
-        CommentResponse.AuthorDto author = new CommentResponse.AuthorDto(
-                comment.getAuthorId(),
-                "임시닉네임",  // TODO: 실제 닉네임
-                "임시프로필URL"  // TODO: 실제 프로필 이미지
-        );
+
+        CommentResponse.AuthorDto author = getUserAuthorInfo(comment.getAuthorId());
 
         return new CommentResponse(
                 comment.getId(),

@@ -1,5 +1,6 @@
 package com.playblog.blogservice.comment.entity;
 
+import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,8 +24,9 @@ public class Comment {
     @Column(name = "post_id", nullable = false)
     private Long postId; // 게시글 id
 
-    @Column(name = "author_id", nullable = false)
-    private Long authorId; // 작성자 id, UserInfo ID (User Service 참조, UserInfo 테이블의 ID)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -45,9 +47,9 @@ public class Comment {
     private LocalDateTime createdAt;
 
     @Builder
-    public Comment(Long postId, Long authorId, String content, Boolean isSecret) {
+    public Comment(Long postId, User author, String content, Boolean isSecret) {
         this.postId = postId;
-        this.authorId = authorId;
+        this.author = author;
         this.content = content;
         this.isSecret = isSecret != null ? isSecret : false; // null 체크
         this.isDeleted = false; // 생성시 기본값
@@ -70,5 +72,9 @@ public class Comment {
         if (this.likeCount > 0) {
             this.likeCount--; // 공감 수 감소 (0 미만 방지)
         }
+    }
+
+    public Long getAuthorId() {
+        return author != null ? author.getId() : null;
     }
 }

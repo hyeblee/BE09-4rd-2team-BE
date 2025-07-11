@@ -1,4 +1,4 @@
-package com.playblog.blogservice.post.dto;
+package com.playblog.blogservice.postlike.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
