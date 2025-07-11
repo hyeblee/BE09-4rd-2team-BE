@@ -82,7 +82,8 @@ public class Post {
             TopicType topicType,
             SubTopic subTopic,
             PostVisibility visibility,
-            User user
+            User user,
+            LocalDateTime publishedAt
 //            List<String> tags
     ) {
         this.title = title;
@@ -93,5 +94,7 @@ public class Post {
         this.subTopic = subTopic;
         this.visibility = visibility;
         this.user = user;
+        this.publishedAt = publishedAt;
+        // this.tags = tags;
     }
 }
