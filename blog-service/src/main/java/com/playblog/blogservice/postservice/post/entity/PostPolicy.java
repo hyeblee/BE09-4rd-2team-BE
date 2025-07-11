@@ -3,6 +3,8 @@ package com.playblog.blogservice.postservice.post.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.security.Policy;
+
 @Entity
 @Setter
 @Getter

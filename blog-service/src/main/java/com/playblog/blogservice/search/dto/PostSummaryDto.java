@@ -24,4 +24,5 @@ public class PostSummaryDto {
     private Long commentCount;
     private LocalDateTime createdAt;
     private SubTopic subTopic;
+    private String subTopicName;
 }

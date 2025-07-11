@@ -13,6 +13,7 @@ import com.playblog.blogservice.userInfo.UserInfo;
 @Getter
 @Setter
 public class PostRequestDto {
+    // 외래키
     private Long userId;
 
     /**
@@ -45,12 +46,14 @@ public class PostRequestDto {
      * 메인 주제 (필수)
      * Enum: ENTERTAINMENT_ARTS, LIFESTYLE 등
      */
+    @NotNull
     private TopicType mainTopic;
 
     /**
      * 서브 주제 (필수)
      * Enum: LITERATURE_BOOK, MOVIE 등
      */
+    @NotNull
     private SubTopic subTopic;
 
     /**
