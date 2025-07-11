@@ -62,7 +62,7 @@ public class SearchService {
     public List<AllTopicResponseDto> getAllTopics() {
         // SubTopic들을 TopicType별로 그룹화
         Map<TopicType, List<SubTopic>> groupedTopics = Arrays.stream(SubTopic.values())
-                .collect(Collectors.groupingBy(SubTopic::getTopicType));
+                .collect(Collectors.groupingBy(SubTopic::getMainTopic));
 
         // TopicType 기준으로 AllTopicResponseDto 리스트 만들기
         return Arrays.stream(TopicType.values())

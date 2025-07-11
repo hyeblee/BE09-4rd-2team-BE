@@ -13,6 +13,7 @@ import com.playblog.blogservice.search.repository.UserRepository;
 import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,6 +93,45 @@ public class PostService {
 
         return PostResponseDto.from(post, userInfo, policy, likeCount, isLiked);
     }
+
+    @Transactional
+    public PostResponseDto updatePost(Long postId, @Valid PostRequestDto dto) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다. id=" + postId));
+
+        // JPA의 영속성 컨텍스트와 변경 감지(dirty checking) 기능
+        post.update(
+                dto.getTitle(),
+                dto.getContent(),
+                dto.getVisibility(),
+                dto.getAllowComment(),
+                dto.getAllowLike(),
+                dto.getAllowSearch(),
+                dto.getThumbnailImageUrl(),
+                dto.getMainTopic(),    // enum 필드
+                dto.getSubTopic()      // enum 필드
+        );
+
+        return PostResponseDto.fromEntity(post);
+    }
+
+    @Transactional
+    public void deletePost(Long postId) {
+
+        // 1) PostPolicy 엔티티 조회 ( 우선 삭제 )
+        PostPolicy policy = postPolicyRepository.findById(postId)
+                .orElse(null);
+        if (policy != null) {
+            postPolicyRepository.delete(policy);
+        }
+
+        // 2) Post 엔티티 삭제   ( 부모 엔터티 삭제 )
+        if (!postRepository.existsById(postId)) {
+            throw new EntityNotFoundException("삭제할 게시글이 없습니다. id=" + postId);
+        }
+        postRepository.deleteById(postId);
+    }
+
 
 }
 

@@ -50,7 +50,7 @@ public class Post {
     /* 메인 주제 */
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TopicType topicType;
+    private TopicType mainTopic;
 
     /* 하위(서브) 주제 */
     @Column(nullable = false)
@@ -79,7 +79,7 @@ public class Post {
             String content,
             String thumbnailImageUrl,
             String category,
-            TopicType topicType,
+            TopicType mainTopic,
             SubTopic subTopic,
             PostVisibility visibility,
             User user,
@@ -90,11 +90,34 @@ public class Post {
         this.content = content;
         this.thumbnailImageUrl = thumbnailImageUrl;
         this.category = category;
-        this.topicType = topicType;
+        this.mainTopic = mainTopic;
         this.subTopic = subTopic;
         this.visibility = visibility;
         this.user = user;
         this.publishedAt = publishedAt;
         // this.tags = tags;
+    }
+
+    // JPA의 영속성 컨텍스트와 변경 감지(dirty checking) 기능
+    public void update(
+            String title,
+            String content,
+            PostVisibility visibility,
+            Boolean allowComment,
+            Boolean allowLike,
+            Boolean allowSearch,
+            String thumbnailImageUrl,
+            TopicType mainTopic,
+            SubTopic subTopic
+    ) {
+        this.title             = title;
+        this.content           = content;
+        this.visibility        = visibility;
+        this.allowComment      = allowComment;
+        this.allowLike         = allowLike;
+        this.allowSearch       = allowSearch;
+        this.thumbnailImageUrl = thumbnailImageUrl;
+        this.mainTopic         = mainTopic;
+        this.subTopic          = subTopic;
     }
 }

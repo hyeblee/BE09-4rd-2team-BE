@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface PostPolicyRepository extends JpaRepository<PostPolicy, Long> {
     Optional<PostPolicy> findByPostId(Long id);
+
     // 정책 저장용 Repository
 }
