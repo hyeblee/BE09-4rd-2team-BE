@@ -25,7 +25,7 @@ public class Comment {
     private Long postId; // 게시글 id
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User author;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
@@ -56,8 +56,11 @@ public class Comment {
         this.likeCount = 0L; // 생성시 기본값
     }
 
-    public void updateContent(String content) {
+    public void updateContent(String content, Boolean isSecret) {
         this.content = content; // 댓글 수정
+        if (isSecret != null) {
+            this.isSecret = isSecret;
+        }
     }
 
     public void markAsDeleted() {

@@ -2,6 +2,7 @@ package com.playblog.blogservice.comment.service;
 
 import com.playblog.blogservice.comment.dto.*;
 import com.playblog.blogservice.comment.entity.Comment;
+import com.playblog.blogservice.comment.repository.CommentLikeRepository;
 import com.playblog.blogservice.comment.repository.CommentRepository;
 import com.playblog.blogservice.common.repository.UserRepository;
 import com.playblog.blogservice.user.User;
@@ -23,6 +24,7 @@ public class CommentService {
     private final CommentLikeService commentLikeService;
     private final UserRepository userRepository;
     private final UserInfoService userInfoService;
+    private final CommentLikeRepository commentLikeRepository;
 
     /**
      * 댓글 작성
@@ -81,7 +83,7 @@ public class CommentService {
             throw new RuntimeException("댓글 수정 권한이 없습니다.");
         }
 
-        comment.updateContent(request.getContent());
+        comment.updateContent(request.getContent(), request.getIsSecret());
 
         // 공감 여부 확인
         boolean isLiked = commentLikeService.isCommentLikedByUser(commentId, requestUserId);
@@ -102,7 +104,11 @@ public class CommentService {
             throw new RuntimeException("댓글 삭제 권한이 없습니다.");
         }
 
+        // 댓글 소프트 삭제
         comment.markAsDeleted();
+
+        // 댓글 공감 완전한 삭제
+        commentLikeRepository.deleteByCommentId(commentId);
     }
 
     /**

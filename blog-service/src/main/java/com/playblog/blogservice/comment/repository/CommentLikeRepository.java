@@ -25,6 +25,9 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
     // 공감한 댓글 목록
     List<CommentLike> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-    // 댓글 공감 삭제
+    // 사용자 1명의 댓글 공감 삭제
     void deleteByCommentIdAndUserId(Long commentId, Long userId);
+
+    // 해당 댓글의 모든 공감 삭제
+    void deleteByCommentId(Long commentId);
 }
