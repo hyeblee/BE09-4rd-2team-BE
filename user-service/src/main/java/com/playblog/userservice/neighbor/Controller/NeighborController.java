@@ -2,8 +2,8 @@ package com.playblog.userservice.neighbor.Controller;
 
 
 import com.playblog.userservice.neighbor.Entity.Neighbor;
-import com.playblog.userservice.neighbor.Entity.User;
 import com.playblog.userservice.neighbor.Entity.UserInfo;
+
 import com.playblog.userservice.neighbor.Repository.UserInfoRepository;
 import com.playblog.userservice.neighbor.Service.NeighborService;
 import com.playblog.userservice.neighbor.dto.*;

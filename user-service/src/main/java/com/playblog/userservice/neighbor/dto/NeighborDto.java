@@ -3,7 +3,6 @@ package com.playblog.userservice.neighbor.dto;
 
 import com.playblog.userservice.neighbor.Entity.Neighbor;
 import com.playblog.userservice.neighbor.Entity.NeighborStatus;
-import com.playblog.userservice.neighbor.Entity.User;
 import com.playblog.userservice.neighbor.Entity.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

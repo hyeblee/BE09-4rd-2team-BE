@@ -2,12 +2,12 @@ package com.playblog.userservice.neighbor.Service;
 
 import com.playblog.userservice.neighbor.Entity.Neighbor;
 import com.playblog.userservice.neighbor.Entity.NeighborStatus;
-import com.playblog.userservice.neighbor.Entity.User;
 import com.playblog.userservice.neighbor.Entity.UserInfo;
 import com.playblog.userservice.neighbor.Repository.NeighborRepository;
 import com.playblog.userservice.neighbor.Repository.UserInfoRepository;
-import com.playblog.userservice.neighbor.Repository.UserRepository;
+
 import com.playblog.userservice.neighbor.dto.NeighborDto;
+import com.playblog.userservice.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
