@@ -2,8 +2,8 @@ package com.playblog.blogservice.neighbor.mapper;
 
 import com.playblog.blogservice.neighbor.Entity.Neighbor;
 import com.playblog.blogservice.neighbor.Entity.NeighborStatus;
-import com.playblog.blogservice.neighbor.Entity.UserInfo;
 import com.playblog.blogservice.neighbor.dto.*;
+import com.playblog.blogservice.userInfo.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
