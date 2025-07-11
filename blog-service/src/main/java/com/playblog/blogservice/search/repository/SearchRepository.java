@@ -2,7 +2,6 @@ package com.playblog.blogservice.search.repository;
 
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.postservice.post.entity.Post;
-import com.playblog.blogservice.search.entity.TestPost;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

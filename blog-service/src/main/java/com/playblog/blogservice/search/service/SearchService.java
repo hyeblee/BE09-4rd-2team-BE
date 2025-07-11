@@ -5,8 +5,9 @@ import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.common.exception.ErrorCode;
 import com.playblog.blogservice.common.exception.SearchException;
 import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
+import com.playblog.blogservice.postservice.post.entity.Post;
+
 import com.playblog.blogservice.search.dto.*;
-import com.playblog.blogservice.search.entity.TestPost;
 import com.playblog.blogservice.search.repository.*;
 import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
@@ -18,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,26 +34,10 @@ public class SearchService {
     private final UserInfoRepository userInfoRepository;
     private final NeighborRepository neighborRepository;
 
-    // 조회 테스트용 게시글 생성
-    public void createPost(PostRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new SearchException(ErrorCode.USER_NOT_FOUND));
-        TestPost testPost = TestPost.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .PublishedAt(LocalDateTime.now())
-                .thumbnailImageUrl(request.getThumbnailImageUrl())
-                .imageUrls(request.getImageUrls())
-                .subTopic(request.getSubTopic())
-                .user(user)
-                .build();
-        searchRepository.save(testPost);
-    }
-
     // 모든 게시글 조회
     @Transactional(readOnly = true)
     public Page<PostSummaryDto> getAllPosts(Pageable pageable) {
-        Page<TestPost> postsPage = searchRepository.findAll(pageable);
+        Page<Post> postsPage = searchRepository.findAll(pageable);
         List<PostSummaryDto> result = convertToPostSummaryDtos(postsPage.getContent());
         // PageImpl을 사용하여 페이지 정보와 함께 반환
         return new PageImpl<>(result, pageable, postsPage.getTotalElements());
@@ -66,40 +50,48 @@ public class SearchService {
         if (keyword == null || keyword.isBlank()) {
             throw new SearchException(ErrorCode.INVALID_PARAMETER);
         }
-        List<TestPost> testPosts = searchRepository.findByTitleOrContent(keyword);
+        List<Post> posts = searchRepository.findByTitleOrContent(keyword);
         // 검색 결과가 없을 경우 예외 처리
-        if (testPosts == null || testPosts.isEmpty()) {
+        if (posts == null || posts.isEmpty()) {
             throw new SearchException(ErrorCode.EMPTY_RESULT);
         }
-        return convertToPostSummaryDtos(testPosts);
+        return convertToPostSummaryDtos(posts);
     }
 
     // 모든 주제 정보 가져오기
     public List<AllTopicResponseDto> getAllTopics() {
+        // SubTopic들을 TopicType별로 그룹화
         Map<TopicType, List<SubTopic>> groupedTopics = Arrays.stream(SubTopic.values())
                 .collect(Collectors.groupingBy(SubTopic::getTopicType));
 
+        // TopicType 기준으로 AllTopicResponseDto 리스트 만들기
         return Arrays.stream(TopicType.values())
                 .map(topicType -> {
-                    List<SubTopicResponseDto> subTopicResponses =  groupedTopics.getOrDefault(topicType, List.of())
+                    // 이 TopicType에 해당하는 SubTopic 리스트를 꺼내서, 각 subTopic에 대해 Dto 생성
+                    List<SubTopicResponseDto> subTopicDtos = groupedTopics.getOrDefault(topicType, List.of())
                             .stream()
-                            .map(sub -> new SubTopicResponseDto(sub.name(), sub.getTopicName()))
+                            .map(sub -> new SubTopicResponseDto(
+                                    sub.name(),        // "subTopic" : Enum 이름
+                                    sub.getSubtopicName() // "subTopicName" : 한글명칭
+                            ))
                             .toList();
 
+                    // AllTopicResponseDto 생성 (각 topicType마다)
                     return new AllTopicResponseDto(
-                            topicType.name(),
-                            topicType.getMainTopic(),
-                            subTopicResponses
+                            topicType.name(),           // "topicType": "ENTERTAIN" 등
+                            topicType.getTopicTypeName(), // "topicName": "엔터테인먼트.예술" 등
+                            subTopicDtos                  // "subTopics"
                     );
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
+
 
     // 특정 주제에 해당하는 게시글 조회
     @Transactional(readOnly = true)
     public List<PostSummaryDto> findBySubTopic(SubTopic subTopic) {
-        List<TestPost> testPosts = searchRepository.findBySubTopic(subTopic);
-        return convertToPostSummaryDtos(testPosts);
+        List<Post> posts = searchRepository.findBySubTopic(subTopic);
+        return convertToPostSummaryDtos(posts);
     }
 
     // 블로그 제목 또는 소개글로 게시글 검색
@@ -134,29 +126,29 @@ public class SearchService {
         return result;
     }
 
-    // 이웃 게시글 조회
-    @Transactional(readOnly = true)
-    public Page<PostSummaryDto> getNeighborPosts(Long myUserId, Pageable pageable) {
-        if (myUserId == null) {
-            throw new SearchException(ErrorCode.INVALID_PARAMETER);
-        }
-        // 1. 이웃 userId 리스트 조회
-        List<Long> neighborUserIds = neighborRepository.findFollowingUserIdsById(myUserId);
-        if (neighborUserIds == null || neighborUserIds.isEmpty()) {
-            throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
-        }
-        // 2. 이웃 userId로 최신 게시글 목록 조회 (페이징)
-        Page<TestPost> posts = searchRepository.findByUserIdInOrderByPublishedAtDesc(neighborUserIds, pageable);
-        // 3. DTO로 변환 (공통 메소드 활용)
-        List<PostSummaryDto> result = convertToPostSummaryDtos(posts.getContent());
-        // 4. PageImpl로 래핑해서 반환
-        return new PageImpl<>(result, pageable, posts.getTotalElements());
-    }
 
+//    // 이웃 게시글 조회
+//    @Transactional(readOnly = true)
+//    public Page<PostSummaryDto> getNeighborPosts(Long myUserinfoId, Pageable pageable) {
+//        if (myUserinfoId == null) {
+//            throw new SearchException(ErrorCode.INVALID_PARAMETER);
+//        }
+//        // 1. 이웃 userId 리스트 조회
+//        List<Long> neighborUserIds = neighborRepository.findFollowingUserInfoIdsByUserInfoId(myUserinfoId);
+//        if (neighborUserIds == null || neighborUserIds.isEmpty()) {
+//            throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
+//        }
+//        // 2. 이웃 userId로 최신 게시글 목록 조회 (페이징)
+//        Page<Post> posts = searchRepository.findByUserIdInOrderByPublishedAtDesc(neighborUserIds, pageable);
+//        // 3. DTO로 변환 (공통 메소드 활용)
+//        List<PostSummaryDto> result = convertToPostSummaryDtos(posts.getContent());
+//        // 4. PageImpl로 래핑해서 반환
+//        return new PageImpl<>(result, pageable, posts.getTotalElements());
+//    }
 
     // 좋아요 수, 댓글 수 집계 후 PostSummaryDto로 변환하는 공통 메서드
-    private List<PostSummaryDto> convertToPostSummaryDtos(List<TestPost> testPosts) {
-        List<Long> postIds = testPosts.stream().map(TestPost::getId).toList();
+    private List<PostSummaryDto> convertToPostSummaryDtos(List<Post> posts) {
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
         Map<Long, Long> likeCounts = postLikeRepository.countLikesByPostIds(postIds).stream()
                 .collect(Collectors.toMap(
                         arr -> (Long) arr[0],
@@ -167,25 +159,28 @@ public class SearchService {
                         arr -> (Long) arr[0],
                         arr -> (Long) arr[1]
                 ));
-        return testPosts.stream()
-                .map(testPost -> {
-                    User user = testPost.getUser();
+        return posts.stream()
+                .map(post -> {
+                    User user = post.getUser();
                     UserInfo info = userInfoRepository
                             .findByUser(user)
                             .orElseThrow(() -> new SearchException(ErrorCode.USER_NOT_FOUND));
+                    SubTopic subTopic = post.getSubTopic();
+                    String subTopicName = subTopic != null ? subTopic.getSubtopicName() : null;
 
                     return PostSummaryDto.builder()
-                            .postId(testPost.getId())
-                            .title(testPost.getTitle())
-                            .content(testPost.getContent())
+                            .postId(post.getId())
+                            .title(post.getTitle())
+                            .content(post.getContent())
                             .nickname(info.getNickname())
                             .blogTitle(info.getBlogTitle())
-                            .thumbnailImageUrl(testPost.getThumbnailImageUrl())
+                            .thumbnailImageUrl(post.getThumbnailImageUrl())
                             .profileImageUrl(info.getProfileImageUrl())
-                            .likeCount(likeCounts.getOrDefault(testPost.getId(), 0L))
-                            .commentCount(commentCounts.getOrDefault(testPost.getId(), 0L))
-                            .createdAt(testPost.getPublishedAt())
-                            .subTopic(testPost.getSubTopic())
+                            .likeCount(likeCounts.getOrDefault(post.getId(), 0L))
+                            .commentCount(commentCounts.getOrDefault(post.getId(), 0L))
+                            .createdAt(post.getPublishedAt())
+                            .subTopic(subTopic)
+                            .subTopicName(subTopicName)
                             .build();
                 })
                 .toList();
