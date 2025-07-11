@@ -15,9 +15,9 @@ import com.playblog.blogservice.user.User;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
     /* 정책 참조 */
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_id")
-    private PostPolicy postPolicy;
+    private Boolean allowComment; // 댓글 허용
+    private Boolean allowLike;    // 좋아요 허용
+    private Boolean allowSearch;  // 검색 허용
 
     /* 유저 참조 */
     @ManyToOne(fetch = FetchType.LAZY)

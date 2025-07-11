@@ -48,28 +48,29 @@ public class PostResponseDto {
     private LocalDateTime commentCreatedAt; // 댓글 작성 일시
     * */
 
-    /* 정책 */
-    @JoinColumn(name = "policy_id")
-    private PostPolicy postPolicy;
-
 // 백에서 DTO 호출시 보이거나 동작하지 않는건 갖고 오지 않는다.
 // 엔터티는 DB용일뿐 그이상 그이하도 아니다.
-//
 
-    public static PostResponseDto from(Post post) {
+    public static PostResponseDto from(
+            Post post,
+            UserInfo userInfo,
+            PostPolicy policy,
+            Long likeCount,
+            Boolean isLiked
+    ) {
         return PostResponseDto.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .visibility(post.getVisibility())
-                .allowComment(post.getPostPolicy() != null ? post.getPostPolicy().getAllowComment() : null)
-                .allowLike(post.getPostPolicy() != null ? post.getPostPolicy().getAllowLike() : null)
-                .allowSearch(post.getPostPolicy() != null ? post.getPostPolicy().getAllowSearch() : null)
-                .blogTitle("임시 블로그")
-                .nickname("임시 닉네임")
-                .profileImageUrl(null)
-                .likeCount(0L)
-                .isLiked(null)
+                .allowComment(policy != null ? policy.getAllowComment() : false)
+                .allowLike(policy != null ? policy.getAllowLike() : false)
+                .allowSearch(policy != null ? policy.getAllowSearch() : false)
+                .blogTitle(userInfo != null ? userInfo.getBlogTitle() : "임시 블로그")
+                .nickname(userInfo != null ? userInfo.getNickname() : "임시 닉네임")
+                .profileImageUrl(userInfo != null ? userInfo.getProfileImageUrl() : null)
+                .likeCount(likeCount != null ? likeCount : 0L)
+                .isLiked(isLiked)
                 .build();
     }
 
