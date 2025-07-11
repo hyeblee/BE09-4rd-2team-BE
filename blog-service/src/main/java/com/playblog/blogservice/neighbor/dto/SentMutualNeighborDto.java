@@ -1,4 +1,4 @@
-package com.playblog.userservice.neighbor.dto;
+package com.playblog.blogservice.neighbor.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

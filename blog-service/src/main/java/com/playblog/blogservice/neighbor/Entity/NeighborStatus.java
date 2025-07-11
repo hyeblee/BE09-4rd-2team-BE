@@ -1,4 +1,4 @@
-package com.playblog.userservice.neighbor.Entity;
+package com.playblog.blogservice.neighbor.Entity;
 
 public enum NeighborStatus {
     /* 서로 이웃 요청 받기 전 */

@@ -1,13 +1,14 @@
-package com.playblog.userservice.neighbor.Service;
+package com.playblog.blogservice.neighbor.Service;
 
-import com.playblog.userservice.neighbor.Entity.Neighbor;
-import com.playblog.userservice.neighbor.Entity.NeighborStatus;
-import com.playblog.userservice.neighbor.Entity.UserInfo;
-import com.playblog.userservice.neighbor.Repository.NeighborRepository;
-import com.playblog.userservice.neighbor.Repository.UserInfoRepository;
 
-import com.playblog.userservice.neighbor.dto.NeighborDto;
-import com.playblog.userservice.user.UserRepository;
+
+
+import com.playblog.blogservice.neighbor.Entity.Neighbor;
+import com.playblog.blogservice.neighbor.Entity.NeighborStatus;
+import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
+import com.playblog.blogservice.neighbor.dto.NeighborDto;
+import com.playblog.blogservice.userInfo.UserInfo;
+import com.playblog.blogservice.userInfo.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
@@ -16,11 +17,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.playblog.userservice.neighbor.Entity.NeighborStatus.*;
+import static com.playblog.blogservice.neighbor.Entity.NeighborStatus.*;
 import static javax.management.Query.in;
 
 @Service
@@ -28,7 +28,6 @@ import static javax.management.Query.in;
 public class NeighborService {
 
     private final NeighborRepository neighborRepository;
-    private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
 
     /* 전체 이웃 조회

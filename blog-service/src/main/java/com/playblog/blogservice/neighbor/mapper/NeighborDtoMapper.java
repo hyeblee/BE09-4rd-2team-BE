@@ -1,9 +1,9 @@
-package com.playblog.userservice.neighbor.mapper;
+package com.playblog.blogservice.neighbor.mapper;
 
-import com.playblog.userservice.neighbor.Entity.Neighbor;
-import com.playblog.userservice.neighbor.Entity.NeighborStatus;
-import com.playblog.userservice.neighbor.Entity.UserInfo;
-import com.playblog.userservice.neighbor.dto.*;
+import com.playblog.blogservice.neighbor.Entity.Neighbor;
+import com.playblog.blogservice.neighbor.Entity.NeighborStatus;
+import com.playblog.blogservice.neighbor.Entity.UserInfo;
+import com.playblog.blogservice.neighbor.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.playblog.userservice.neighbor.Entity.NeighborStatus.ACCEPTED;
+import static com.playblog.blogservice.neighbor.Entity.NeighborStatus.ACCEPTED;
 
 @Component
 @RequiredArgsConstructor
