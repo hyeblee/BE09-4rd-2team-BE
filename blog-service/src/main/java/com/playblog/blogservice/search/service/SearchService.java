@@ -158,24 +158,27 @@ public class SearchService {
                         arr -> (Long) arr[1]
                 ));
         return posts.stream()
-                .map(testPost -> {
-                    User user = testPost.getUser();
+                .map(post -> {
+                    User user = post.getUser();
                     UserInfo info = userInfoRepository
                             .findByUser(user)
                             .orElseThrow(() -> new SearchException(ErrorCode.USER_NOT_FOUND));
+                    SubTopic subTopic = post.getSubTopic();
+                    String subTopicName = subTopic != null ? subTopic.getSubtopicName() : null;
 
                     return PostSummaryDto.builder()
-                            .postId(testPost.getId())
-                            .title(testPost.getTitle())
-                            .content(testPost.getContent())
+                            .postId(post.getId())
+                            .title(post.getTitle())
+                            .content(post.getContent())
                             .nickname(info.getNickname())
                             .blogTitle(info.getBlogTitle())
-                            .thumbnailImageUrl(testPost.getThumbnailImageUrl())
+                            .thumbnailImageUrl(post.getThumbnailImageUrl())
                             .profileImageUrl(info.getProfileImageUrl())
-                            .likeCount(likeCounts.getOrDefault(testPost.getId(), 0L))
-                            .commentCount(commentCounts.getOrDefault(testPost.getId(), 0L))
-                            .createdAt(testPost.getPublishedAt())
-                            .subTopic(testPost.getSubTopic())
+                            .likeCount(likeCounts.getOrDefault(post.getId(), 0L))
+                            .commentCount(commentCounts.getOrDefault(post.getId(), 0L))
+                            .createdAt(post.getPublishedAt())
+                            .subTopic(subTopic)
+                            .subTopicName(subTopicName)
                             .build();
                 })
                 .toList();
