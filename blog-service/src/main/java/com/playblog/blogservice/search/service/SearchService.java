@@ -126,12 +126,12 @@ public class SearchService {
 
     // 이웃 게시글 조회
     @Transactional(readOnly = true)
-    public Page<PostSummaryDto> getNeighborPosts(Long myUserId, Pageable pageable) {
-        if (myUserId == null) {
+    public Page<PostSummaryDto> getNeighborPosts(Long myUserinfoId, Pageable pageable) {
+        if (myUserinfoId == null) {
             throw new SearchException(ErrorCode.INVALID_PARAMETER);
         }
         // 1. 이웃 userId 리스트 조회
-        List<Long> neighborUserIds = neighborRepository.findFollowingUserInfoIdsByUserInfoId(myUserId);
+        List<Long> neighborUserIds = neighborRepository.findFollowingUserInfoIdsByUserInfoId(myUserinfoId);
         if (neighborUserIds == null || neighborUserIds.isEmpty()) {
             throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
         }
