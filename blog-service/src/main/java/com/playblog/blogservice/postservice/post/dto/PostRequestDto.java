@@ -13,6 +13,7 @@ import com.playblog.blogservice.userInfo.UserInfo;
 @Getter
 @Setter
 public class PostRequestDto {
+    // 외래키
     private Long userId;
 
     /**
