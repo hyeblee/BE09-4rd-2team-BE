@@ -2,12 +2,10 @@ package com.playblog.blogservice.neighbor.Controller;
 
 
 import com.playblog.blogservice.neighbor.Entity.Neighbor;
-import com.playblog.blogservice.neighbor.Entity.UserInfo;
-
-
 import com.playblog.blogservice.neighbor.Service.NeighborService;
 import com.playblog.blogservice.neighbor.dto.*;
 import com.playblog.blogservice.neighbor.mapper.NeighborDtoMapper;
+import com.playblog.blogservice.userInfo.UserInfo;
 import com.playblog.blogservice.userInfo.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

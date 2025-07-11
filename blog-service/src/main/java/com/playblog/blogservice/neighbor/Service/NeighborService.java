@@ -1,11 +1,13 @@
 package com.playblog.blogservice.neighbor.Service;
 
+
+
+
 import com.playblog.blogservice.neighbor.Entity.Neighbor;
 import com.playblog.blogservice.neighbor.Entity.NeighborStatus;
-import com.playblog.blogservice.neighbor.Entity.UserInfo;
 import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
-
 import com.playblog.blogservice.neighbor.dto.NeighborDto;
+import com.playblog.blogservice.userInfo.UserInfo;
 import com.playblog.blogservice.userInfo.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 

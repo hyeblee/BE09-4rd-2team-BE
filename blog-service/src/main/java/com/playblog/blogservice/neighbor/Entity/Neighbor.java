@@ -1,5 +1,6 @@
 package com.playblog.blogservice.neighbor.Entity;
 
+import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
