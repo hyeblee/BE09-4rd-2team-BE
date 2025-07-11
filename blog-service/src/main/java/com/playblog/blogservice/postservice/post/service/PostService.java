@@ -63,34 +63,34 @@ public class PostService {
         PostPolicy policy = requestDto.toPolicyEntity(post);
         postPolicyRepository.save(policy);
 
-        /* (UserInfo 정보 들고오면 활성화)
         // 6. 작성자 정보 + 상세 응답 형태로 가공
-        UserInfo userInfo = user.getUserInfo();   // 로그인 미구현
+        UserInfo userInfo = post.getUser().getUserInfo();
+        if (userInfo == null) {
+            throw new IllegalStateException("UserInfo가 연결되지 않았습니다. User ID: " + post.getUser().getId());
+        }
         Long likeCount = 0L; // 최초 0
-        Boolean isLiked = null; // 로그인 미구현
-        return PostResponseDto.from(post, userInfo, likeCount, isLiked); */
+        Boolean isLiked = null;
 
-        return PostResponseDto.from(post);
+        return PostResponseDto.from(post, userInfo, policy, likeCount, isLiked);
     }
-
-
 
     @Transactional(readOnly = true)
     public PostResponseDto getPostDetail(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글 없음"));
 
-
         UserInfo userInfo = post.getUser().getUserInfo(); // 여기선 DB 연관 FK 따라감
         if (userInfo == null) {
             throw new IllegalStateException("UserInfo가 연결되지 않았습니다. User 테이블 user_info_id FK 확인하세요.");
         }
+        PostPolicy policy = postPolicyRepository.findByPostId(post.getId())
+                .orElseThrow(() -> new EntityNotFoundException("정책 없음"));
+
         Long likeCount = testLikeRepository.countByPostId(post.getId());;    // 공감 수
         Boolean isLiked = null; // (현재) 로그인 사용자 없으면 판단 불가
 //        Boolean isLiked = likeRepository.existsByPostIdAndUserId((post.getId(), currentUserId);   // 사용자가 눌렀는지
 
-//        return PostResponseDto.from(post, userInfo, likeCount, isLiked);
-        return PostResponseDto.from(post);
+        return PostResponseDto.from(post, userInfo, policy, likeCount, isLiked);
     }
 
 }
