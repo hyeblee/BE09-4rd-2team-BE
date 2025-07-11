@@ -13,7 +13,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().permitAll()
                 );
-//                .requestMatchers("/api/posts", "/ftp/**").permitAll()
+//                .requestMatchers("/api/posts", "/api/posts/all", "/ftp/**").permitAll()
 //                .anyRequest().authenticated();
         return http.build();
     }
