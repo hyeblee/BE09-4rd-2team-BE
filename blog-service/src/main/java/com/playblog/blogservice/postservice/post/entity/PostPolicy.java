@@ -3,8 +3,6 @@ package com.playblog.blogservice.postservice.post.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.security.Policy;
-
 @Entity
 @Setter
 @Getter
@@ -15,9 +13,9 @@ public class PostPolicy {
     @Id
     private Long id; // Post의 PK와 같음
 
-    @MapsId // Post의 PK 공유
     @OneToOne
     @JoinColumn(name = "id")
+    @MapsId // Post의 PK 공유
     private Post post;
 
     private Boolean allowComment; // 댓글 허용
