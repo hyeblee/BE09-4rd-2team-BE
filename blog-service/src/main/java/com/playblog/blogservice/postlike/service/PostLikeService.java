@@ -1,10 +1,15 @@
 package com.playblog.blogservice.postlike.service;
 
+import com.playblog.blogservice.common.repository.UserRepository;
 import com.playblog.blogservice.postlike.dto.PostLikeResponse;
 import com.playblog.blogservice.postlike.dto.PostLikeUserResponse;
 import com.playblog.blogservice.postlike.dto.PostLikesResponse;
 import com.playblog.blogservice.postlike.entity.PostLike;
 import com.playblog.blogservice.postlike.repository.PostLikeRepository;
+import com.playblog.blogservice.user.User;
+import com.playblog.blogservice.userInfo.UserInfo;
+import com.playblog.blogservice.userInfo.UserInfoService;
+import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,24 +23,28 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class PostLikeService {
 
+    private final UserRepository userRepository;
+    private final UserInfoService userInfoService;
     private final PostLikeRepository postLikeRepository;
 
     // 1. 게시글 공감 토글 (있으면 취소, 없으면 추가)
     @Transactional
     public PostLikeResponse togglePostLike(Long postId, Long userId) {
-        Optional<PostLike> existingLike = postLikeRepository.findByPostIdAndUserId(postId, userId);
+        Optional<PostLike> existingLike = postLikeRepository.findByPostIdAndUser_Id(postId, userId);
 
         if (existingLike.isPresent()) {
             // 이미 공감했으면 공감 취소
-            postLikeRepository.deleteByPostIdAndUserId(postId, userId);
+            postLikeRepository.deleteByPostIdAndUser_Id(postId, userId);
 
             long likeCount = postLikeRepository.countByPostId(postId);
             return new PostLikeResponse(false, likeCount);
         } else {
             // 공감하지 않았으면 공감 추가
+            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
             PostLike newLike = PostLike.builder()
                     .postId(postId)
-                    .userId(userId)
+                    .user(user)
                     .build();
             postLikeRepository.save(newLike);
 
@@ -51,7 +60,7 @@ public class PostLikeService {
 
     // 3. 게시글 공감 여부 확인
     public PostLikeResponse isPostLikedByUser(Long postId, Long userId) {
-        boolean isLiked = postLikeRepository.existsByPostIdAndUserId(postId, userId);
+        boolean isLiked = postLikeRepository.existsByPostIdAndUser_Id(postId, userId);
         long likeCount = postLikeRepository.countByPostId(postId);
         return new PostLikeResponse(isLiked, likeCount);
     }
@@ -63,19 +72,27 @@ public class PostLikeService {
         // PostLike들을 PostLikeUserResponse로 변환
         List<PostLikeUserResponse> likedUsers = postLikes.stream()
                 .map(postLike -> {
-                    // UserDto 생성 (임시 데이터)
-                    PostLikeUserResponse.UserDto user = new PostLikeUserResponse.UserDto(
-                            postLike.getUserId(),
-                            "임시닉네임",  // TODO: User Service 연동
-                            "임시프로필URL",
-                            "한 줄 소개"
-                    );
+                    Long userId = postLike.getUserId();
+                    try {
+                        UserInfoResponse userInfo = userInfoService.getUserInfo(userId);
+                        PostLikeUserResponse.UserDto userDto = new PostLikeUserResponse.UserDto(
+                                userId,
+                                userInfo.getNickname(),
+                                "https://api.pravatar.cc/150?img=" + (userId % 50),
+                                userInfo.getProfileIntro()
+                        );
+                        return new PostLikeUserResponse(userDto, false, postLike.getCreatedAt());
+                    } catch (Exception e) {
+                        // 탈퇴한 사용자 처리
+                        PostLikeUserResponse.UserDto userDto = new PostLikeUserResponse.UserDto(
+                                userId,
+                                "탈퇴한 사용자",
+                                "https://api.pravatar.cc/150?img=" + (userId % 50),
+                                ""
+                        );
+                        return new PostLikeUserResponse(userDto, false, postLike.getCreatedAt());
+                    }
 
-                    return new PostLikeUserResponse(
-                            user,
-                            true,  // TODO: 실제 이웃 여부 확인
-                            postLike.getCreatedAt()
-                    );
                 })
                 .collect(Collectors.toList());
 

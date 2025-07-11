@@ -1,5 +1,6 @@
 package com.playblog.blogservice.postlike.entity;
 
+import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
         import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,16 +25,21 @@ public class PostLike {
     @Column(name = "post_id", nullable = false)
     private Long postId; // Post 참조용
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; // User Service 참조용
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public PostLike(Long postId, Long userId) {
+    public PostLike(Long postId, User user) {
         this.postId = postId;
-        this.userId = userId;
+        this.user = user;
+    }
+
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
     }
 }
