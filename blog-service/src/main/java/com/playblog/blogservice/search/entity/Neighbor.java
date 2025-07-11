@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "test_neighbor")
+@Table(name = "neighbor")
 @Getter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Neighbor {
     @Id

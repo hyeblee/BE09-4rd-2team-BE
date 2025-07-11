@@ -4,13 +4,11 @@ import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.common.exception.ErrorCode;
 import com.playblog.blogservice.common.exception.SearchException;
+import com.playblog.blogservice.postservice.post.entity.Post;
 import com.playblog.blogservice.search.dto.*;
-import com.playblog.blogservice.search.entity.TestPost;
-import com.playblog.blogservice.search.entity.TestUser;
-import com.playblog.blogservice.search.entity.TestUserInfo;
 import com.playblog.blogservice.search.repository.*;
 import com.playblog.blogservice.user.User;
-//import com.playblog.blogservice.userInfo.UserInfo;
+import com.playblog.blogservice.userInfo.UserInfo;
 import com.playblog.blogservice.userInfo.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +29,13 @@ public class SearchService {
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
-    private final TestUserInfoRepository userInfoRepository;
+    private final UserInfoRepository userInfoRepository;
     private final NeighborRepository neighborRepository;
 
     // 모든 게시글 조회
     @Transactional(readOnly = true)
     public Page<PostSummaryDto> getAllPosts(Pageable pageable) {
-        Page<TestPost> postsPage = searchRepository.findAll(pageable);
+        Page<Post> postsPage = searchRepository.findAll(pageable);
         List<PostSummaryDto> result = convertToPostSummaryDtos(postsPage.getContent());
         // PageImpl을 사용하여 페이지 정보와 함께 반환
         return new PageImpl<>(result, pageable, postsPage.getTotalElements());
@@ -51,12 +48,12 @@ public class SearchService {
         if (keyword == null || keyword.isBlank()) {
             throw new SearchException(ErrorCode.INVALID_PARAMETER);
         }
-        List<TestPost> testPosts = searchRepository.findByTitleOrContent(keyword);
+        List<Post> posts = searchRepository.findByTitleOrContent(keyword);
         // 검색 결과가 없을 경우 예외 처리
-        if (testPosts == null || testPosts.isEmpty()) {
+        if (posts == null || posts.isEmpty()) {
             throw new SearchException(ErrorCode.EMPTY_RESULT);
         }
-        return convertToPostSummaryDtos(testPosts);
+        return convertToPostSummaryDtos(posts);
     }
 
     // 모든 주제 정보 가져오기
@@ -91,8 +88,8 @@ public class SearchService {
     // 특정 주제에 해당하는 게시글 조회
     @Transactional(readOnly = true)
     public List<PostSummaryDto> findBySubTopic(SubTopic subTopic) {
-        List<TestPost> testPosts = searchRepository.findBySubTopic(subTopic);
-        return convertToPostSummaryDtos(testPosts);
+        List<Post> posts = searchRepository.findBySubTopic(subTopic);
+        return convertToPostSummaryDtos(posts);
     }
 
     // 블로그 제목 또는 소개글로 게시글 검색
@@ -139,7 +136,7 @@ public class SearchService {
             throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
         }
         // 2. 이웃 userId로 최신 게시글 목록 조회 (페이징)
-        Page<TestPost> posts = searchRepository.findByUserIdInOrderByPublishedAtDesc(neighborUserIds, pageable);
+        Page<Post> posts = searchRepository.findByUserIdInOrderByPublishedAtDesc(neighborUserIds, pageable);
         // 3. DTO로 변환 (공통 메소드 활용)
         List<PostSummaryDto> result = convertToPostSummaryDtos(posts.getContent());
         // 4. PageImpl로 래핑해서 반환
@@ -148,8 +145,8 @@ public class SearchService {
 
 
     // 좋아요 수, 댓글 수 집계 후 PostSummaryDto로 변환하는 공통 메서드
-    private List<PostSummaryDto> convertToPostSummaryDtos(List<TestPost> testPosts) {
-        List<Long> postIds = testPosts.stream().map(TestPost::getId).toList();
+    private List<PostSummaryDto> convertToPostSummaryDtos(List<Post> posts) {
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
         Map<Long, Long> likeCounts = postLikeRepository.countLikesByPostIds(postIds).stream()
                 .collect(Collectors.toMap(
                         arr -> (Long) arr[0],
@@ -160,10 +157,10 @@ public class SearchService {
                         arr -> (Long) arr[0],
                         arr -> (Long) arr[1]
                 ));
-        return testPosts.stream()
+        return posts.stream()
                 .map(testPost -> {
-                    TestUser user = testPost.getUser();
-                    TestUserInfo info = userInfoRepository
+                    User user = testPost.getUser();
+                    UserInfo info = userInfoRepository
                             .findByUser(user)
                             .orElseThrow(() -> new SearchException(ErrorCode.USER_NOT_FOUND));
 
@@ -184,7 +181,7 @@ public class SearchService {
                 .toList();
     }
 
-    private BlogSearchDto toBlogSearchDto(TestUserInfo info) {
+    private BlogSearchDto toBlogSearchDto(UserInfo info) {
         BlogSearchDto.BlogSearchDtoBuilder builder = BlogSearchDto.builder()
                 .profileIntro(info.getProfileIntro())
                 .profileImageUrl(info.getProfileImageUrl())
