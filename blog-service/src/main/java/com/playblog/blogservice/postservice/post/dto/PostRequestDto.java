@@ -46,12 +46,14 @@ public class PostRequestDto {
      * 메인 주제 (필수)
      * Enum: ENTERTAINMENT_ARTS, LIFESTYLE 등
      */
-    private TopicType topicType;
+    @NotNull
+    private TopicType mainTopic;
 
     /**
      * 서브 주제 (필수)
      * Enum: LITERATURE_BOOK, MOVIE 등
      */
+    @NotNull
     private SubTopic subTopic;
 
     /**
@@ -92,7 +94,7 @@ public class PostRequestDto {
                 .content(content)
                 .thumbnailImageUrl(thumbnailImageUrl)
                 .category(category)
-                .topicType(topicType)
+                .topicType(mainTopic)
                 .subTopic(subTopic)
                 .visibility(visibility)
                 .user(user)
