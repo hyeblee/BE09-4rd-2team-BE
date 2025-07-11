@@ -6,6 +6,7 @@ import com.playblog.blogservice.common.exception.ErrorCode;
 import com.playblog.blogservice.common.exception.SearchException;
 import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
 import com.playblog.blogservice.postservice.post.entity.Post;
+
 import com.playblog.blogservice.search.dto.*;
 import com.playblog.blogservice.search.repository.*;
 import com.playblog.blogservice.user.User;
@@ -125,6 +126,7 @@ public class SearchService {
         return result;
     }
 
+
 //    // 이웃 게시글 조회
 //    @Transactional(readOnly = true)
 //    public Page<PostSummaryDto> getNeighborPosts(Long myUserinfoId, Pageable pageable) {
@@ -143,7 +145,6 @@ public class SearchService {
 //        // 4. PageImpl로 래핑해서 반환
 //        return new PageImpl<>(result, pageable, posts.getTotalElements());
 //    }
-
 
     // 좋아요 수, 댓글 수 집계 후 PostSummaryDto로 변환하는 공통 메서드
     private List<PostSummaryDto> convertToPostSummaryDtos(List<Post> posts) {
