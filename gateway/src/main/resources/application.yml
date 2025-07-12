@@ -14,3 +14,10 @@ spring:
             - Path=/goodplace/user-management/**
           filters:
             - RewritePath=/goodplace/user-management/(?<segment>.*), /${segment}
+
+        - id: blog-service
+          uri: http://localhost:8081  # Blog Service 직접 연결
+          predicates:
+            - Path=/goodplace/blog-service/**
+          filters:
+            - RewritePath=/goodplace/blog-service/(?<segment>.*), /${segment}
