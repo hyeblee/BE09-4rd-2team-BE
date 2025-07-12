@@ -80,14 +80,16 @@ public class CommentController {
     }
 
     /**
-     * 댓글 수 조회 (Post Service용)
+     * 댓글 수 조회 (Post, Search 위한 용도)
+     * 사용처: 검색 검색결과, 게시글 상세/목록
      */
     @GetMapping("/posts/{postId}/comments/count")
     public ResponseEntity<Map<String, Object>> getCommentCount(@PathVariable Long postId) {
         Long count = commentService.getCommentCount(postId);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("count", count);
+        response.put("postId", postId);
+        response.put("commentCount", count);
 
         return ResponseEntity.ok(response);
     }
