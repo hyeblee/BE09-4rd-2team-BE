@@ -7,7 +7,6 @@ import com.playblog.blogservice.postlike.dto.PostLikesResponse;
 import com.playblog.blogservice.postlike.entity.PostLike;
 import com.playblog.blogservice.postlike.repository.PostLikeRepository;
 import com.playblog.blogservice.user.User;
-import com.playblog.blogservice.userInfo.UserInfo;
 import com.playblog.blogservice.userInfo.UserInfoService;
 import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
