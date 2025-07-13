@@ -7,6 +7,7 @@ import com.playblog.blogservice.common.exception.SearchException;
 import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
 import com.playblog.blogservice.postservice.post.entity.Post;
 
+import com.playblog.blogservice.postservice.post.repository.PostRepository;
 import com.playblog.blogservice.search.dto.*;
 import com.playblog.blogservice.search.repository.*;
 import com.playblog.blogservice.user.User;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SearchService {
-    private final SearchRepository searchRepository;
+    private final PostRepository searchRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
@@ -133,7 +134,7 @@ public class SearchService {
             throw new SearchException(ErrorCode.INVALID_PARAMETER);
         }
         // 1. 이웃 userId 리스트 조회
-        List<Long> neighborUserIds = neighborRepository.findFollowingUserIdsById(myUserId);
+        List<Long> neighborUserIds = neighborRepository.findFollowingUserIdsByFromUserId(myUserId);
         if (neighborUserIds == null || neighborUserIds.isEmpty()) {
             throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
         }
