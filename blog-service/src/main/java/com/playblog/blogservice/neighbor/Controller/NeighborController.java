@@ -54,9 +54,7 @@ public class NeighborController {
             @RequestHeader Long userId
     ) {
         List<Neighbor> neighbors = neighborService.getAddedToMeNeighbors(userId);
-        for(Neighbor n : neighbors) {
-            System.out.println("여기에요=============" + n.getFromUserInfo().getId());
-        }
+
         List<Neighbor> reverseNeighbors = neighborService.getAddedForMeNeighbors(userId);
         List<MyAddedToMeNeighborDto> result = neighborDtoMapper.toMyReceivedDto(neighbors, reverseNeighbors);
 
@@ -100,15 +98,25 @@ public class NeighborController {
         return ResponseEntity.noContent().build();
     }
 
-    // 이웃 요청
+    // 이웃 요청(다수)
     @PatchMapping("/accept")
+    public ResponseEntity<Void> insertNeighbors(
+            @RequestHeader Long fromUserId,
+            @RequestBody List<Long> insertUserIds
+    ){
+        neighborService.acceptNeighborsStatus(fromUserId,insertUserIds);
+        return ResponseEntity.noContent().build();
+    }
+    // 이웃 요청(한명)
+    @PatchMapping("/{insertUserId}/accept")
     public ResponseEntity<Void> insertNeighbor(
             @RequestHeader Long fromUserId,
-            @RequestBody List<Long> insertUserId
+            @PathVariable Long insertUserId
     ){
         neighborService.acceptNeighbor(fromUserId,insertUserId);
         return ResponseEntity.noContent().build();
     }
+
 
     // 서로이웃 수락(단체)
     @PostMapping("/batch-accept")
@@ -130,10 +138,10 @@ public class NeighborController {
         return ResponseEntity.noContent().build();
     }
     // 이웃관계 삭제
-    @DeleteMapping("/{deleteUserId}/delete")
+    @DeleteMapping("/delete")
     public ResponseEntity<Void> rejectAllNeighbors(
             @RequestHeader Long userId,
-            @PathVariable Long deleteUserId
+            @RequestBody List<Long> deleteUserId
     ){
         neighborService.rejectAllRelationNeighbor(userId,deleteUserId);
         return ResponseEntity.noContent().build();
@@ -144,6 +152,25 @@ public class NeighborController {
             @RequestBody List<Long> changeUserId
     ){
         neighborService.changeRelationNeighbor(userId,changeUserId);
+        return ResponseEntity.noContent().build();
+    }
+    // 내가 보낸 신청 취소
+    @PostMapping("/batch-cancel")
+    public ResponseEntity<Void> cancelRequestNeighbors(
+            @RequestHeader Long userId,
+            @RequestBody List<Long> cancelUserIds
+    ){
+        neighborService.cancelRequestNeighbors(userId,cancelUserIds);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 유저 차단
+    @PostMapping("/batch-block")
+    public ResponseEntity<Void> blockNeighbors(
+            @RequestHeader Long userId,
+            @RequestBody List<Long> blockUserIds
+            ){
+        neighborService.blockNeighbors(userId,blockUserIds);
         return ResponseEntity.noContent().build();
     }
 }
