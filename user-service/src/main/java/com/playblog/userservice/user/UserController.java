@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/email-check")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -29,7 +29,7 @@ public class UserController {
   }
 
 
-  @PostMapping
+  @PostMapping("/register")
   public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegisterRequestDto requestDto) {
     try {
       userService.registerUser(requestDto);
