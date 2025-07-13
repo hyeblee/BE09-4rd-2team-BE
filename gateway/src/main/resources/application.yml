@@ -11,13 +11,15 @@ spring:
         - id: user-management
           uri: lb://USER-MANAGEMENT
           predicates:
-            - Path=/goodplace/user-management/**
+            - Path=/api/user-management/**
           filters:
-            - RewritePath=/goodplace/user-management/(?<segment>.*), /${segment}
 
-        - id: blog-service
-          uri: http://localhost:8081  # Blog Service 직접 연결
-          predicates:
-            - Path=/goodplace/blog-service/**
-          filters:
-            - RewritePath=/goodplace/blog-service/(?<segment>.*), /${segment}
+            - RewritePath=/api/user-management/(?<segment>.*), /$\{segment}
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
