@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity(name = "BlogPostLike")
+@Entity
 @Table(name = "post_likes")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

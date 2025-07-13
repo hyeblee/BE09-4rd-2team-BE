@@ -1,4 +1,4 @@
-package com.playblog.blogservice.postservice.post.entity;
+package com.playblog.blogservice.post.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

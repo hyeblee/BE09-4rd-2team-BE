@@ -1,4 +1,4 @@
-package com.playblog.blogservice.postservice.post.entity;
+package com.playblog.blogservice.post.entity;
 
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;

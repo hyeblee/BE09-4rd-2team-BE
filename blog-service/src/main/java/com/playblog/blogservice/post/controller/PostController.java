@@ -1,9 +1,9 @@
-package com.playblog.blogservice.postservice.post.controller;
+package com.playblog.blogservice.post.controller;
 
-import com.playblog.blogservice.postservice.post.dto.PostRequestDto;
+import com.playblog.blogservice.post.dto.PostRequestDto;
 //import com.playblog.blogservice.postservice.post.dto.PostResponseDto;
-import com.playblog.blogservice.postservice.post.dto.PostResponseDto;
-import com.playblog.blogservice.postservice.post.service.PostService;
+import com.playblog.blogservice.post.dto.PostResponseDto;
+import com.playblog.blogservice.post.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

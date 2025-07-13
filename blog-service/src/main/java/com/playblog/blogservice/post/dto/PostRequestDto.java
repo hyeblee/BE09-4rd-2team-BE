@@ -1,14 +1,15 @@
-package com.playblog.blogservice.postservice.post.dto;
+package com.playblog.blogservice.post.dto;
 
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
-import com.playblog.blogservice.postservice.post.entity.*;
+import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.post.entity.PostPolicy;
+import com.playblog.blogservice.post.entity.PostVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import com.playblog.blogservice.user.User;
-import com.playblog.blogservice.userInfo.UserInfo;
 
 @Getter
 @Setter

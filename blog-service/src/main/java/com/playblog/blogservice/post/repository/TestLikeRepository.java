@@ -1,6 +1,6 @@
-package com.playblog.blogservice.postservice.post.repository;
+package com.playblog.blogservice.post.repository;
 
-import com.playblog.blogservice.postservice.post.entity.TestLike;
+import com.playblog.blogservice.post.entity.TestLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

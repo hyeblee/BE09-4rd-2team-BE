@@ -1,15 +1,12 @@
-package com.playblog.blogservice.postservice.post.dto;
+package com.playblog.blogservice.post.dto;
 
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
-import com.playblog.blogservice.postservice.post.entity.Post;
-import com.playblog.blogservice.postservice.post.entity.PostPolicy;
-import com.playblog.blogservice.postservice.post.entity.PostVisibility;
+import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.post.entity.PostPolicy;
+import com.playblog.blogservice.post.entity.PostVisibility;
 import com.playblog.blogservice.userInfo.UserInfo;
-import jakarta.persistence.JoinColumn;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
