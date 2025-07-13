@@ -1,6 +1,8 @@
 server:
   port: 8000
 spring:
+  config:
+    import: application-secret.yml  # 시크릿 키 숨기기
   application:
     name: gateway-server
   cloud:
@@ -12,29 +14,10 @@ spring:
             - Path=/goodplace/user-management/**
           filters:
             - RewritePath=/goodplace/user-management/(?<segment>.*), /${segment}
-        - id: location-service
-          uri: lb://LOCATION-SERVICE
+
+        - id: blog-service
+          uri: http://localhost:8081  # Blog Service 직접 연결
           predicates:
-            - Path=/goodplace/location-service/**
+            - Path=/goodplace/blog-service/**
           filters:
-            - RewritePath=/goodplace/location-service/(?<segment>.*), /${segment}
-        - id: schedule-service
-          uri: lb://SCHEDULE-SERVICE
-          predicates:
-            - Path=/goodplace/schedule-service/**
-          filters:
-            - RewritePath=/goodplace/schedule-service/(?<segment>.*), /${segment}
-        - id: review-service
-          uri: lb://REVIEW-SERVICE
-          predicates:
-            - Path=/goodplace/review-service/**
-          filters:
-            - RewritePath=/goodplace/review-service/(?<segment>.*), /${segment}
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-jwt:
-  secret: LH9QZL8upsPBfuDY+Dkb1kT9DZIIUSuA2u4O6Lfi3mkEfeWtETpVTcR/8SMZdJWn/xNTuCQBE6rBvDXgnVmscQ==
+            - RewritePath=/goodplace/blog-service/(?<segment>.*), /${segment}

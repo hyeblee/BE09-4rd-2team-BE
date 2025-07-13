@@ -13,5 +13,5 @@ public enum TopicType {
     HOBBY("취미.여가.여행"),
     KNOWLEDGE("지식.동향");
 
-    private final String mainTopic;
+    private final String topicTypeName;
 }
