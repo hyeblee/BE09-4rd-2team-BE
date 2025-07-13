@@ -17,9 +17,13 @@ public class CommentLikeController {
 
     // 댓글 공감/ 취소 토글
     @PostMapping("/{commentId}/like")
-    public ResponseEntity<Map<String, Object>> toggleCommentLike(@PathVariable Long commentId) {
-        // TODO : JWT 토큰에서 사용자 ID 추출
-        Long userId = 1L;
+    public ResponseEntity<Map<String, Object>> toggleCommentLike(
+            @PathVariable Long commentId,
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        if (userId == 0) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
 
         try {
             boolean isLiked = commentLikeService.toggleCommentLike(commentId, userId);
@@ -40,10 +44,9 @@ public class CommentLikeController {
     // 댓글 공감 상태 조회
     @GetMapping("/{commentId}/like/status")
     public ResponseEntity<Map<String, Object>> getCommentLikeStatus(
-            @PathVariable Long commentId) {
-
-        // TODO: JWT 토큰에서 사용자 ID 추출
-        Long userId = 1L; // 임시 사용자 ID
+            @PathVariable Long commentId,
+            @RequestHeader(value = "X-User-Id", defaultValue = "0") Long userId
+    ) {
 
         boolean isLiked = commentLikeService.isCommentLikedByUser(commentId, userId);
         long likeCount = commentLikeService.getCommentLikeCount(commentId);

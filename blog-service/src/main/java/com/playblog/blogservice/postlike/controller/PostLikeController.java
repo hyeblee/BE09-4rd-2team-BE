@@ -21,9 +21,13 @@ public class PostLikeController {
      * 포스트 공감/취소 (토글)
      */
     @PostMapping("/posts/{postId}/like")
-    public ResponseEntity<PostLikeResponse> togglePostLike(@PathVariable Long postId) {
-        // TODO: JWT 토큰에서 사용자 ID 추출 (현재는 임시로 1L)
-        Long userId = 1L;
+    public ResponseEntity<PostLikeResponse> togglePostLike(
+            @PathVariable Long postId,
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        if (userId == 0) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
 
         PostLikeResponse response = postLikeService.togglePostLike(postId, userId);
 
@@ -34,8 +38,11 @@ public class PostLikeController {
      * 공감한 블로거 목록 조회
      */
     @GetMapping("/posts/{postId}/likes")
-    public ResponseEntity<PostLikesResponse> getPostLikes(@PathVariable Long postId) {
-        PostLikesResponse response = postLikeService.getPostLikeUsers(postId);
+    public ResponseEntity<PostLikesResponse> getPostLikes(
+            @PathVariable Long postId,
+            @RequestHeader(value = "X-User-Id", defaultValue = "0") Long requestUserId
+    ) {
+        PostLikesResponse response = postLikeService.getPostLikeUsers(postId, requestUserId);
 
         return ResponseEntity.ok(response);
     }
@@ -44,10 +51,10 @@ public class PostLikeController {
      * 게시글 공감 여부 확인
      */
     @GetMapping("/posts/{postId}/like/status")
-    public ResponseEntity<PostLikeResponse> getPostLikeStatus(@PathVariable Long postId) {
-        // TODO: JWT 토큰에서 사용자 ID 추출
-        Long userId = 1L;
-
+    public ResponseEntity<PostLikeResponse> getPostLikeStatus(
+            @PathVariable Long postId,
+            @RequestHeader(value = "X-User-Id", defaultValue = "0") Long userId
+    ) {
         PostLikeResponse response = postLikeService.isPostLikedByUser(postId, userId);
 
         return ResponseEntity.ok(response);

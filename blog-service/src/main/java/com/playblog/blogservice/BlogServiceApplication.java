@@ -27,6 +27,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.playblog.blogservice.common.repository",
         "com.playblog.blogservice.userInfo"
 })
+//@SpringBootApplication
 public class BlogServiceApplication {
 
     public static void main(String[] args) {

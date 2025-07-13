@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "BlogComment" )
 @Table(name = "comments")
 @Getter
 @NoArgsConstructor

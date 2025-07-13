@@ -25,10 +25,12 @@ public class CommentController {
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable Long postId,
-            @RequestBody @Valid CommentRequest request
+            @RequestBody @Valid CommentRequest request,
+            @RequestHeader("X-User-Id") Long authorId
     ) {
-        // TODO: JWT 토큰에서 사용자 ID 추출 (현재는 임시로 1L)
-        Long authorId = 1L;
+        if (authorId == 0) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
 
         CommentResponse response = commentService.createComment(postId, request, authorId);
 
@@ -39,11 +41,9 @@ public class CommentController {
      * 댓글 목록 조회
      */
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<CommentsResponse> getComments(@PathVariable Long postId) {
-        // TODO: JWT 토큰에서 사용자 ID 추출
-        Long requestUserId = 1L;
-        // TODO: Post Service에서 게시글 작성자 ID 가져오기
-        Long postAuthorId = 1L;
+    public ResponseEntity<CommentsResponse> getComments(@PathVariable Long postId, @RequestHeader(value = "X-User-Id", defaultValue = "0") Long requestUserId) {
+
+        Long postAuthorId = 1L; // TODO: Post Service에서 게시글 작성자 ID 가져오기
 
         CommentsResponse response = commentService.getCommentsByPostId(postId, requestUserId, postAuthorId);
 
@@ -56,10 +56,12 @@ public class CommentController {
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(
             @PathVariable Long commentId,
-            @RequestBody @Valid CommentRequest request
+            @RequestBody @Valid CommentRequest request,
+            @RequestHeader("X-User-Id") Long requestUserId
     ) {
-        // TODO: JWT 토큰에서 사용자 ID 추출
-        Long requestUserId = 1L;
+        if (requestUserId == 0) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
 
         CommentResponse response = commentService.updateComment(commentId, request, requestUserId);
 
@@ -70,9 +72,13 @@ public class CommentController {
      * 댓글 삭제
      */
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
-        // TODO: JWT 토큰에서 사용자 ID 추출
-        Long requestUserId = 1L;
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long commentId,
+            @RequestHeader("X-User-Id") Long requestUserId
+    ) {
+        if (requestUserId == 0) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
 
         commentService.deleteComment(commentId, requestUserId);
 

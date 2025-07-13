@@ -65,7 +65,7 @@ public class PostLikeService {
     }
 
     // 4. 게시글에 공감한 사용자 목록 조회
-    public PostLikesResponse getPostLikeUsers(Long postId) {
+    public PostLikesResponse getPostLikeUsers(Long postId, Long requestUserId) {
         List<PostLike> postLikes = postLikeRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         // PostLike들을 PostLikeUserResponse로 변환
