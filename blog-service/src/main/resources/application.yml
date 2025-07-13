@@ -7,20 +7,23 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC 드라이버 클래스 (MySQL 8.x 표준)
-    url: jdbc:mysql://mysql.coffit.xyz:3322/vldb  # 연결할 MySQL DB URL
+    url: jdbc:mysql://mysql.macacolabs.site:3322/vldb  # 연결할 MySQL DB URL
     username: vlog  # DB 사용자 계정
     password: vlog  # DB 비밀번호
 
   jpa:
     hibernate:
-      ddl-auto: create  # 스키마 자동 생성 전략 (create: 실행 시 기존 테이블 삭제 후 새로 생성)
-    show-sql: true  # 실행되는 SQL 쿼리 로그 출력
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true  # SQL 쿼리를 보기 좋게 들여쓰기하여 출력
 
-# 아래는 JWT 관련 설정 (현재 주석 처리됨)
-# jwt:
-#   secret: LH9QZL8upsPBfuDY+Dkb1kT9DZIIUSuA2u4O6Lfi3mkEfeWtETpVTcR/8SMZdJWn/xNTuCQBE6rBvDXgnVmscQ==
-#   expiration: 1800000 # 액세스 토큰 만료 시간(ms) → 30분
-#   refresh-expiration: 604800000 # 리프레시 토큰 만료 시간(ms) → 7일
+ftp:
+  server: dev.macacolabs.site
+  port: 21
+  user: ${FTP_USER}      # 환경변수로 대체
+  pass: ${FTP_PASS}      # 환경변수로 대체
+  remote-dir: /images/2/thumb
+  base-url: http://dev.macacolabs.site:8008/images/2/thumb
+
