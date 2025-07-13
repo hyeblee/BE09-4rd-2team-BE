@@ -6,8 +6,7 @@ import com.playblog.blogservice.comment.repository.CommentLikeRepository;
 import com.playblog.blogservice.comment.repository.CommentRepository;
 import com.playblog.blogservice.common.repository.UserRepository;
 import com.playblog.blogservice.user.User;
-import com.playblog.blogservice.userInfo.UserInfoService;
-import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
+import com.playblog.blogservice.userInfo.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,6 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentLikeService commentLikeService;
     private final UserRepository userRepository;
-    private final UserInfoService userInfoService;
     private final CommentLikeRepository commentLikeRepository;
 
     /**
@@ -149,24 +147,31 @@ public class CommentService {
      * 댓글 내용 표시 (권한에 따라) - 기존 로직
      */
     public String getDisplayContent(Comment comment, Long requestUserId, Long postAuthorId) {
-        if (canViewContent(comment, requestUserId, postAuthorId)) {
-            return comment.getContent();
-        }
-        return "비밀댓글입니다";
+        return canViewContent(comment, requestUserId, postAuthorId)
+                ? comment.getContent()
+                : "비밀댓글입니다";
     }
     /**
      * 실제 사용자 정보 조회(안전한 예외처리 포함)
      */
     private CommentResponse.AuthorDto getUserAuthorInfo(Long authorId) {
         try {
-            UserInfoResponse userInfo = userInfoService.getUserInfo(authorId);
+            // UserRepository 사용해서 직접 처리
+            User user = userRepository.findById(authorId)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+            // User에서 UserInfo 가져오기
+            UserInfo userInfo = user.getUserInfo();  // JPA 연관관계 활용
+
+            String nickname = userInfo != null ? userInfo.getNickname() : "사용자";
+
             return new CommentResponse.AuthorDto(
                     authorId,
-                    userInfo.getNickname() != null ? userInfo.getNickname() : "사용자",
-                    "https://api.pravatar.cc/150?img=" + (authorId % 50) // ← 임시 이미지
+                    nickname,
+                    "https://api.pravatar.cc/150?img=" + (authorId % 50)
             );
         } catch (Exception e) {
-            // 탈퇴한 사용자인 경우
+            // 실패 시 기본값
             return new CommentResponse.AuthorDto(
                     authorId,
                     "탈퇴한 사용자",
