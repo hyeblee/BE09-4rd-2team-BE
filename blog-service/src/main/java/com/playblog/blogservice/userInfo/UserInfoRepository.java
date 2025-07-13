@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
     // 블로그명 검색
-    @Query("SELECT u FROM UserInfo u WHERE u.blogTitle LIKE %:blogKeyword% " +
-            "OR u.profileIntro LIKE %:blogKeyword%")
-    List<UserInfo> findByBlogTitleOrProfileIntro(@Param("blogKeyword") String blogKeyword);
+    @Query("SELECT u FROM UserInfo u WHERE u.blogTitle LIKE %:blogTitle% " +
+            "OR u.profileIntro LIKE %:blogTitle%")
+    List<UserInfo> findByBlogTitleOrProfileIntro(@Param("blogTitle") String blogTitle);
 
     // 별명.아이디 검색
     @Query("SELECT u FROM UserInfo u WHERE u.nickname LIKE %:nickname% " +
