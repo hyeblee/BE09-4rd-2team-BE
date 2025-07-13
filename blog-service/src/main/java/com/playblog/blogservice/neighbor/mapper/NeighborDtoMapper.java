@@ -63,18 +63,20 @@ public class NeighborDtoMapper {
     }
 
     public ReceivedMutualNeighborDto toReceivedMutualDto(Neighbor neighbor) {
-        UserInfo user = neighbor.getToUserInfo();
+        UserInfo user = neighbor.getFromUserInfo();
         return new ReceivedMutualNeighborDto(
-                user.getBlogId(),
-                neighbor.getFollowedAt()
+                user.getId(),
+                user.getNickname(),
+                neighbor.getRequestedAt()
         );
     }
 
     public SentMutualNeighborDto toSentMutualDto(Neighbor neighbor) {
         UserInfo user = neighbor.getToUserInfo();
         return new SentMutualNeighborDto(
-                user.getBlogId(),
-                neighbor.getFollowedAt()
+                user.getId(),
+                user.getNickname(),
+                neighbor.getRequestedAt()
         );
     }
 

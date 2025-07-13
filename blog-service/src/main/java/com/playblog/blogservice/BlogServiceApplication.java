@@ -1,7 +1,7 @@
 package com.playblog.blogservice;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 
 @SpringBootApplication
 public class BlogServiceApplication {
@@ -11,3 +11,5 @@ public class BlogServiceApplication {
     }
 
 }
+
+

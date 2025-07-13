@@ -18,4 +18,7 @@ public class UserInfoResponse {
     this.blogId = userInfo.getBlogId();
     this.profileIntro = userInfo.getProfileIntro();
   }
+
+
+
 }

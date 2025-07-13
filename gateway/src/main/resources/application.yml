@@ -1,40 +1,52 @@
 server:
   port: 8000
+
 spring:
+  config:
+    import: application-secret.yml
   application:
     name: gateway-server
   cloud:
     gateway:
       routes:
-        - id: user-management
+        - id: user-management-users
           uri: lb://USER-MANAGEMENT
           predicates:
-            - Path=/goodplace/user-management/**
+            - Path=/api/user-management/users/**
           filters:
-            - RewritePath=/goodplace/user-management/(?<segment>.*), /${segment}
-        - id: location-service
-          uri: lb://LOCATION-SERVICE
+            - RewritePath=/api/user-management/users/(?<segment>.*), /api/users/${segment}
+
+        - id: user-management-auth
+          uri: lb://USER-MANAGEMENT
           predicates:
-            - Path=/goodplace/location-service/**
+            - Path=/api/user-management/auth/**
           filters:
-            - RewritePath=/goodplace/location-service/(?<segment>.*), /${segment}
-        - id: schedule-service
-          uri: lb://SCHEDULE-SERVICE
+            - RewritePath=/api/user-management/auth/(?<segment>.*), /auth/${segment}
+
+        - id: blog-service
+          uri: lb://BLOG-SERVICE
           predicates:
-            - Path=/goodplace/schedule-service/**
+            - Path=/api/blog-service/**
           filters:
-            - RewritePath=/goodplace/schedule-service/(?<segment>.*), /${segment}
-        - id: review-service
-          uri: lb://REVIEW-SERVICE
-          predicates:
-            - Path=/goodplace/review-service/**
-          filters:
-            - RewritePath=/goodplace/review-service/(?<segment>.*), /${segment}
+            - RewritePath=/api/blog-service/(?<segment>.*), /${segment}
+
+      globalcors:  # ✅ 이 들여쓰기로 수정
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
+
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka
-jwt:
-  secret: LH9QZL8upsPBfuDY+Dkb1kT9DZIIUSuA2u4O6Lfi3mkEfeWtETpVTcR/8SMZdJWn/xNTuCQBE6rBvDXgnVmscQ==
