@@ -1,17 +1,20 @@
 package com.playblog.blogservice.search.service;
 
+import com.playblog.blogservice.comment.repository.CommentLikeRepository;
+import com.playblog.blogservice.comment.repository.CommentRepository;
+import com.playblog.blogservice.comment.service.CommentService;
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.common.exception.ErrorCode;
 import com.playblog.blogservice.common.exception.SearchException;
 import com.playblog.blogservice.neighbor.Entity.Neighbor;
-import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
 import com.playblog.blogservice.neighbor.Service.NeighborService;
-import com.playblog.blogservice.postservice.post.entity.Post;
+import com.playblog.blogservice.post.entity.Post;
 
-import com.playblog.blogservice.postservice.post.repository.PostRepository;
+import com.playblog.blogservice.post.repository.PostRepository;
+import com.playblog.blogservice.postlike.repository.PostLikeRepository;
+import com.playblog.blogservice.postlike.service.PostLikeService;
 import com.playblog.blogservice.search.dto.*;
-import com.playblog.blogservice.search.repository.*;
 import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
 import com.playblog.blogservice.userInfo.UserInfoRepository;
@@ -30,16 +33,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SearchService {
-    private final PostRepository searchRepository;
-    private final PostLikeRepository postLikeRepository;
-    private final CommentRepository commentRepository;
+    private final PostRepository postRepository;
     private final UserInfoRepository userInfoRepository;
+    private final PostLikeService postLikeService;
+    private final CommentService commentService;
     private final NeighborService neighborService;
 
     // 모든 게시글 조회
     @Transactional(readOnly = true)
     public Page<PostSummaryDto> getAllPosts(Pageable pageable) {
-        Page<Post> postsPage = searchRepository.findAll(pageable);
+        Page<Post> postsPage = postRepository.findAll(pageable);
         List<PostSummaryDto> result = convertToPostSummaryDtos(postsPage.getContent());
         // PageImpl을 사용하여 페이지 정보와 함께 반환
         return new PageImpl<>(result, pageable, postsPage.getTotalElements());
@@ -52,7 +55,7 @@ public class SearchService {
         if (keyword == null || keyword.isBlank()) {
             throw new SearchException(ErrorCode.INVALID_PARAMETER);
         }
-        List<Post> posts = searchRepository.findByTitleOrContent(keyword);
+        List<Post> posts = postRepository.findByTitleOrContent(keyword);
         // 검색 결과가 없을 경우 예외 처리
         if (posts == null || posts.isEmpty()) {
             throw new SearchException(ErrorCode.EMPTY_RESULT);
@@ -92,7 +95,7 @@ public class SearchService {
     // 특정 주제에 해당하는 게시글 조회
     @Transactional(readOnly = true)
     public List<PostSummaryDto> findBySubTopic(SubTopic subTopic) {
-        List<Post> posts = searchRepository.findBySubTopic(subTopic);
+        List<Post> posts = postRepository.findBySubTopic(subTopic);
         return convertToPostSummaryDtos(posts);
     }
 
@@ -143,7 +146,7 @@ public class SearchService {
             throw new SearchException(ErrorCode.EMPTY_RESULT);
         }
         // 3. 이웃의 userInfoId로 게시글 조회
-        Page<Post> posts = searchRepository.findByUser_UserInfo_IdInOrderByPublishedAtDesc(neighborUserInfoIds, pageable);
+        Page<Post> posts = postRepository.findByUser_UserInfo_IdInOrderByPublishedAtDesc(neighborUserInfoIds, pageable);
         List<PostSummaryDto> result = convertToPostSummaryDtos(posts.getContent());
         return new PageImpl<>(result, pageable, posts.getTotalElements());
     }
@@ -151,17 +154,6 @@ public class SearchService {
 
     // 좋아요 수, 댓글 수 집계 후 PostSummaryDto로 변환하는 공통 메서드
     private List<PostSummaryDto> convertToPostSummaryDtos(List<Post> posts) {
-        List<Long> postIds = posts.stream().map(Post::getId).toList();
-        Map<Long, Long> likeCounts = postLikeRepository.countLikesByPostIds(postIds).stream()
-                .collect(Collectors.toMap(
-                        arr -> (Long) arr[0],
-                        arr -> (Long) arr[1]
-                ));
-        Map<Long, Long> commentCounts = commentRepository.countCommentsByPostIds(postIds).stream()
-                .collect(Collectors.toMap(
-                        arr -> (Long) arr[0],
-                        arr -> (Long) arr[1]
-                ));
         return posts.stream()
                 .map(post -> {
                     User user = post.getUser();
@@ -170,6 +162,8 @@ public class SearchService {
                             .orElseThrow(() -> new SearchException(ErrorCode.USER_NOT_FOUND));
                     SubTopic subTopic = post.getSubTopic();
                     String subTopicName = subTopic != null ? subTopic.getSubtopicName() : null;
+                    long likeCount = postLikeService.getPostLikeCount(post.getId());
+                    long commentCount = commentService.getCommentCount(post.getId());
 
                     return PostSummaryDto.builder()
                             .postId(post.getId())
@@ -179,8 +173,8 @@ public class SearchService {
                             .blogTitle(info.getBlogTitle())
                             .thumbnailImageUrl(post.getThumbnailImageUrl())
                             .profileImageUrl(info.getProfileImageUrl())
-                            .likeCount(likeCounts.getOrDefault(post.getId(), 0L))
-                            .commentCount(commentCounts.getOrDefault(post.getId(), 0L))
+                            .likeCount(likeCount)
+                            .commentCount(commentCount)
                             .publishedAt(post.getPublishedAt())
                             .subTopic(subTopic)
                             .subTopicName(subTopicName)
