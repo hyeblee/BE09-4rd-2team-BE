@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 public class SentMutualNeighborDto{
-    private String blogId;
+    private Long id;
+    private String nickname;
     protected LocalDate requestedAt;
 }
