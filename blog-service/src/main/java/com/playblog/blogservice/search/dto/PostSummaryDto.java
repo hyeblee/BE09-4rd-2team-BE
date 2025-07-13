@@ -22,7 +22,7 @@ public class PostSummaryDto {
     private String profileImageUrl; // 프로필 이미지
     private Long likeCount;
     private Long commentCount;
-    private LocalDateTime createdAt;
+    private LocalDateTime publishedAt;
     private SubTopic subTopic;
     private String subTopicName;
 }

@@ -1,5 +1,6 @@
 server:
-  port: 8081  # 서버 실행 포트
+  port: 8081
+#  port: ${SERVER_PORT:8081}   # env SERVER_PORT가 있으면 그 값을, 없으면 8081을 기본으로
 
 spring:
   application:
@@ -13,17 +14,23 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true  # SQL 쿼리를 보기 좋게 들여쓰기하여 출력
 
 ftp:
-  server: dev.macacolabs.site
-  port: 21
-  user: ${FTP_USER}      # 환경변수로 대체
-  pass: ${FTP_PASS}      # 환경변수로 대체
-  remote-dir: /images/2/thumb
-  base-url: http://dev.macacolabs.site:8008/images/2/thumb
+  server:       dev.macacolabs.site
+  port:         21
+  user:         ${FTP_USER}
+  pass:         ${FTP_PASS}
+
+  # 원본 이미지 저장 디렉토리
+  editor-dir:   /images/2/editor
+  # 썸네일 저장 디렉토리
+  thumb-dir:    /images/2/thumb
+
+  base-url:       http://dev.macacolabs.site:8008/images/2/editor
+  thumb-base-url: http://dev.macacolabs.site:8008/images/2/thumb
 
