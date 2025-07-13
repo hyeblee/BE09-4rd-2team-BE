@@ -32,4 +32,6 @@ public interface NeighborRepository extends JpaRepository<Neighbor,Long> {
     List<Neighbor> findByFromUserInfoIdInAndToUserInfoIdAndStatus(List<Long> attr0, Long attr1, NeighborStatus status);
 
     List<Long> findFollowingUserIdsById(Long myUserId);
+
+    Optional<Neighbor> findByFromUserInfoAndToUserInfoAndStatus(UserInfo me, UserInfo other, NeighborStatus neighborStatus);
 }
