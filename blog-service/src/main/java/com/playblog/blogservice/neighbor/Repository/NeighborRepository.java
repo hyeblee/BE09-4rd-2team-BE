@@ -35,6 +35,4 @@ public interface NeighborRepository extends JpaRepository<Neighbor,Long> {
 
     @Query("select n.toUserInfo.id from Neighbor n where n.fromUserInfo.id = :myUserId and n.status = 'FOLLOWING'")
     List<Long> findFollowingUserIdsByFromUserId(@Param("myUserId") Long myUserId);
-
-
 }
