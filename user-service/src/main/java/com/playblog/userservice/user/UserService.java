@@ -23,6 +23,7 @@ public class UserService {
 
   @Transactional
   public void registerUser(UserRegisterRequestDto requestDto) {
+    System.out.println(requestDto);
     if (isEmailDuplicate(requestDto.getEmailId())) {
       throw new DuplicateEmailException();
     }

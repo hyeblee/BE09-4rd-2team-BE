@@ -13,7 +13,7 @@ spring:
           predicates: # 어떤 요청을 이 라우트로 보낼지 정의
             - Path=/api/user-management/** # 이 경로로 들어오는 요청만 처리함
           filters:  # 실제로 라우팅할 때 요청을 어떻게 가공할지 정의
-            - RewritePath=/api/user-management/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/user-management/(?<segment>.*), /api/users/$\{segment}
 
         - id: blog-service
           uri: http://BLOG-SERVICE  # Blog Service 직접 연결

@@ -22,9 +22,11 @@ public class HeaderAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
+        log.info("Request URI: {}", request.getRequestURI());
+
         // API Gateway가 전달한 헤더 읽기
         // /api/users 경로는 인증 무시 (permitAll)
-        if (path.startsWith("/api/users")) {
+        if (path.startsWith("/register")) {
             filterChain.doFilter(request, response);
             return;  // 인증 안 하고 다음 필터로 넘김
         }
