@@ -4,7 +4,9 @@ import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.common.exception.ErrorCode;
 import com.playblog.blogservice.common.exception.SearchException;
+import com.playblog.blogservice.neighbor.Entity.Neighbor;
 import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
+import com.playblog.blogservice.neighbor.Service.NeighborService;
 import com.playblog.blogservice.postservice.post.entity.Post;
 
 import com.playblog.blogservice.postservice.post.repository.PostRepository;
@@ -31,9 +33,8 @@ public class SearchService {
     private final PostRepository searchRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
-    private final NeighborRepository neighborRepository;
+    private final NeighborService neighborService;
 
     // 모든 게시글 조회
     @Transactional(readOnly = true)
@@ -130,21 +131,23 @@ public class SearchService {
     // 이웃 게시글 조회
     @Transactional(readOnly = true)
     public Page<PostSummaryDto> getNeighborPosts(Long myUserId, Pageable pageable) {
-        if (myUserId == null) {
-            throw new SearchException(ErrorCode.INVALID_PARAMETER);
+        // 1. 내가 추가한 이웃(ACCEPTED, REQUESTED) 리스트 조회
+        List<Neighbor> neighbors = neighborService.getAddedForMeNeighbors(myUserId);
+
+        // 2. 이웃 UserInfo id 추출
+        List<Long> neighborUserInfoIds = neighbors.stream()
+                .map(neighbor -> neighbor.getToUserInfo().getId())
+                .toList();
+
+        if (neighborUserInfoIds.isEmpty()) {
+            throw new SearchException(ErrorCode.EMPTY_RESULT);
         }
-        // 1. 이웃 userId 리스트 조회
-        List<Long> neighborUserIds = neighborRepository.findFollowingUserIdsByFromUserId(myUserId);
-        if (neighborUserIds == null || neighborUserIds.isEmpty()) {
-            throw new SearchException(ErrorCode.EMPTY_RESULT); // 이웃이 없습니다
-        }
-        // 2. 이웃 userId로 최신 게시글 목록 조회 (페이징)
-        Page<Post> posts = searchRepository.findByUserIdInOrderByPublishedAtDesc(neighborUserIds, pageable);
-        // 3. DTO로 변환 (공통 메소드 활용)
+        // 3. 이웃의 userInfoId로 게시글 조회
+        Page<Post> posts = searchRepository.findByUser_UserInfo_IdInOrderByPublishedAtDesc(neighborUserInfoIds, pageable);
         List<PostSummaryDto> result = convertToPostSummaryDtos(posts.getContent());
-        // 4. PageImpl로 래핑해서 반환
         return new PageImpl<>(result, pageable, posts.getTotalElements());
     }
+
 
     // 좋아요 수, 댓글 수 집계 후 PostSummaryDto로 변환하는 공통 메서드
     private List<PostSummaryDto> convertToPostSummaryDtos(List<Post> posts) {
