@@ -14,21 +14,21 @@ spring:
           predicates:
             - Path=/api/user-management/users/**
           filters:
-            - RewritePath=/api/user-management/users/(?<segment>.*), /api/users/${segment}
+            - RewritePath=/api/user-management/users/(?<segment>.*), /api/users/$\{segment}
 
         - id: user-management-auth
           uri: lb://USER-MANAGEMENT
           predicates:
             - Path=/api/user-management/auth/**
           filters:
-            - RewritePath=/api/user-management/auth/(?<segment>.*), /auth/${segment}
+            - RewritePath=/api/user-management/auth/(?<segment>.*), /auth/$\{segment}
 
         - id: blog-service
           uri: lb://BLOG-SERVICE
           predicates:
             - Path=/api/blog-service/**
           filters:
-            - RewritePath=/api/blog-service/(?<segment>.*), /${segment}
+            - RewritePath=/api/blog-service/(?<segment>.*), /$\{segment}
 
       globalcors:  # ✅ 이 들여쓰기로 수정
         corsConfigurations:
