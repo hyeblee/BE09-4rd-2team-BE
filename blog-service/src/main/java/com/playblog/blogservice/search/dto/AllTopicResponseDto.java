@@ -10,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 public class AllTopicResponseDto {
         private String topicType;
-        private String topicName;
+        private String topicTypeName;
         private List<SubTopicResponseDto> subTopics;
 }

@@ -18,6 +18,6 @@ public enum SubTopic {
     SOCIETY("사회.정치", TopicType.KNOWLEDGE),
     HEALTH("건강.의학", TopicType.KNOWLEDGE);
 
-    private final String topicName;
-    private final TopicType topicType;
+    private final String subtopicName;
+    private final TopicType mainTopic;
 }

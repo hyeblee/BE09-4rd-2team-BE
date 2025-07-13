@@ -1,18 +1,15 @@
 package com.playblog.blogservice.userInfo;
 
+import com.playblog.blogservice.neighbor.Entity.Neighbor;
 import com.playblog.blogservice.user.User;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.*;
 
-import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,11 +31,12 @@ public class UserInfo {
   String profileIntro; // 프로필 소개글
   String profileImageUrl; // 프로필 이미지 URL
 
+
   // Neighbor은 단방향 참조 예정..
-/*  @OneToMany(mappedBy = "fromUserInfo")
+ @OneToMany(mappedBy = "fromUserInfo")
   private List<Neighbor> followingList;
 
   @OneToMany(mappedBy = "toUserInfo")
-  private List<Neighbor> followerList;*/
+  private List<Neighbor> followerList;
 
 }

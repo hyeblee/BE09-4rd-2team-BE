@@ -88,4 +88,65 @@ public class FtpUploader {
 
         return savedFileName;
     }
+
+    /* 썸네일 이미지로 */
+    /**
+     * 바이트 스트림(InputStream)을 FTP 서버에 업로드하고,
+     * UUID + 확장자 형태의 파일명을 반환합니다.
+     *
+     * @param server    FTP 서버 주소
+     * @param port      FTP 포트
+     * @param user      FTP 사용자 이름
+     * @param pass      FTP 비밀번호
+     * @param remoteDir FTP 서버 내 저장 디렉토리 (예: "/images/2/thumb")
+     * @param stream    업로드할 데이터를 담은 InputStream
+     * @param ext       파일 확장자(예: ".png", ".jpg")
+     * @return 저장된 파일명(UUID + ext)
+     * @throws IOException 업로드 실패 시 예외 발생
+     */
+    public static String uploadStream(
+            String server,
+            int port,
+            String user,
+            String pass,
+            String remoteDir,
+            InputStream stream,
+            String ext
+    ) throws IOException {
+        // 1) UUID 기반 파일명 생성
+        String fileName = UUID.randomUUID().toString() + ext;
+
+        FTPClient ftp = new FTPClient();
+        try {
+            // 2) 서버 접속 및 로그인
+            ftp.connect(server, port);
+            if (!ftp.login(user, pass)) {
+                throw new IOException("FTP 로그인 실패");
+            }
+
+            // 3) Passive 모드 & 바이너리 모드 설정
+            ftp.enterLocalPassiveMode();
+            ftp.setFileType(FTP.BINARY_FILE_TYPE);
+
+            // 4) 디렉토리 이동
+            if (!ftp.changeWorkingDirectory(remoteDir)) {
+                throw new IOException("디렉토리 이동 실패: " + remoteDir);
+            }
+
+            // 5) 스트림 업로드
+            if (!ftp.storeFile(fileName, stream)) {
+                throw new IOException("스트림 업로드 실패: " + fileName);
+            }
+
+            // 6) 로그아웃
+            ftp.logout();
+        } finally {
+            // 7) 연결 해제
+            if (ftp.isConnected()) {
+                ftp.disconnect();
+            }
+        }
+
+        return fileName;
+    }
 }

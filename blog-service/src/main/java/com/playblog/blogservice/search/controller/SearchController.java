@@ -105,14 +105,14 @@ public class SearchController {
      * @param size 페이지 크기 (기본값: 10)
      * @return ResponseEntity<ApiResponse<Page<PostSummaryDto>>> 이웃 게시글 목록
      */
-    @GetMapping("/neighbors")
-    public ResponseEntity<ApiResponse<Page<PostSummaryDto>>> getNeighborPosts(
-            @RequestParam Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<PostSummaryDto> neighborPosts = searchService.getNeighborPosts(userId, pageable);
-        return ResponseEntity.ok(ApiResponse.success(neighborPosts));
-    }
+//    @GetMapping("/neighbors")
+//    public ResponseEntity<ApiResponse<Page<PostSummaryDto>>> getNeighborPosts(
+//            @RequestParam Long userId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size
+//    ) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+//        Page<PostSummaryDto> neighborPosts = searchService.getNeighborPosts(userId, pageable);
+//        return ResponseEntity.ok(ApiResponse.success(neighborPosts));
+//    }
 }
