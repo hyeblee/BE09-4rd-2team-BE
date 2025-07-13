@@ -2,6 +2,8 @@ server:
   port: 0
 
 spring:
+  config:
+    import: application-secret.yml
   application:
     name: USER-MANAGEMENT
   datasource:
@@ -32,12 +34,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka
-jwt:
-  secret: LH9QZL8upsPBfuDY+Dkb1kT9DZIIUSuA2u4O6Lfi3mkEfeWtETpVTcR/8SMZdJWn/xNTuCQBE6rBvDXgnVmscQ==
-  expiration: 3600000 # 60분
-  refresh-expiration: 604800000 # 7일
-
-
 
 
 
