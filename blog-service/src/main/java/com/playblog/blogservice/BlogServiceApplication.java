@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-
 @SpringBootApplication(scanBasePackages = {
         "com.playblog.blogservice.comment",
         "com.playblog.blogservice.postlike",
@@ -20,7 +19,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.playblog.blogservice.postlike.entity",
         "com.playblog.blogservice.user",
         "com.playblog.blogservice.userInfo",
-
+        "com.playblog.blogservice.neighbor"
 })
 @EnableJpaRepositories(basePackages = {
         "com.playblog.blogservice.comment.repository",

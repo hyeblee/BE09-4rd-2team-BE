@@ -4,7 +4,7 @@ server:
 
 spring:
   application:
-    name: USER-MANAGEMENT  # 스프링 애플리케이션 이름 (스프링 클라우드/로깅 등에 사용)
+    name: BLOG-SERVICE  # 스프링 애플리케이션 이름 (스프링 클라우드/로깅 등에 사용)
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC 드라이버 클래스 (MySQL 8.x 표준)
