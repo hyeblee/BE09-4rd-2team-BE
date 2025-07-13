@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "ftp")
 public class FtpProperties {
     private String server;
-    private int port;
+    private int    port;
     private String user;
     private String pass;
-    private String remoteDir;
+    private String editorDir;
+    private String thumbDir;
     private String baseUrl;
+    private String thumbBaseUrl;
 }
