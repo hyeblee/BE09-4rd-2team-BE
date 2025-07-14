@@ -12,13 +12,11 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 게시글의 댓글 목록 조회 (삭제되지 않은 것만)
-    List<Comment> findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(Long postId);
+    List<Comment> findByPost_IdAndIsDeletedFalseOrderByCreatedAtAsc(Long postId);
 
     // 게시글의 댓글 수 조회 (삭제되지 않은 것만)
-    long countByPostIdAndIsDeletedFalse(Long postId);
+    long countByPost_IdAndIsDeletedFalse(Long postId);
 
     // 댓글이 존재하고 삭제되지 않았는지 확인
     boolean existsByIdAndIsDeletedFalse(Long commentId);
-
-    // 게시글의 최근 댓글 N개 조회
 }

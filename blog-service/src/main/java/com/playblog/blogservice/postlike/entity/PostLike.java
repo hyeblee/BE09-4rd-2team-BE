@@ -1,17 +1,20 @@
 package com.playblog.blogservice.postlike.entity;
 
+import com.playblog.blogservice.post.entity.Post;
 import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
         import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "BlogPostLike")
 @Table(name = "post_likes")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,8 +25,10 @@ public class PostLike {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "post_id", nullable = false)
-    private Long postId; // Post 참조용
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -34,8 +39,8 @@ public class PostLike {
     private LocalDateTime createdAt;
 
     @Builder
-    public PostLike(Long postId, User user) {
-        this.postId = postId;
+    public PostLike(Post post, User user) {
+        this.post = post;
         this.user = user;
     }
 
