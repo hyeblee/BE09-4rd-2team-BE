@@ -4,10 +4,11 @@ import com.playblog.blogservice.comment.dto.*;
 import com.playblog.blogservice.comment.entity.Comment;
 import com.playblog.blogservice.comment.repository.CommentLikeRepository;
 import com.playblog.blogservice.comment.repository.CommentRepository;
-import com.playblog.blogservice.common.repository.UserRepository;
+import com.playblog.blogservice.user.UserRepository;
+import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.post.repository.PostRepository;
 import com.playblog.blogservice.user.User;
-import com.playblog.blogservice.userInfo.UserInfoService;
-import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
+import com.playblog.blogservice.userInfo.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +24,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentLikeService commentLikeService;
     private final UserRepository userRepository;
-    private final UserInfoService userInfoService;
     private final CommentLikeRepository commentLikeRepository;
+    private final PostRepository postRepository;
 
     /**
      * 댓글 작성
@@ -34,25 +35,38 @@ public class CommentService {
         // DB에서 실제 User가 존재하는지 확인
         User author = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        Comment comment = Comment.builder()
-                .postId(postId)
+        Post targetPost = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+        // ✅ 추가: 댓글 허용 여부 확인
+        if (targetPost.getAllowComment() != null && !targetPost.getAllowComment()) {
+            throw new IllegalArgumentException("이 게시글은 댓글을 허용하지 않습니다.");
+        }
+
+        Comment savedComment = Comment.builder()
+                .post(targetPost)
                 .author(author)
                 .content(request.getContent())
                 .isSecret(request.getIsSecret())
                 .build();
 
-        Comment savedComment = commentRepository.save(comment);
+        Comment saved = commentRepository.save(savedComment);
 
-        return convertToCommentResponse(savedComment, userId, false);
+        return convertToCommentResponse(saved, userId, false);
     }
 
     /**
      * 댓글 목록 조회
      */
     public CommentsResponse getCommentsByPostId(Long postId, Long requestUserId, Long postAuthorId) {
+
+        // Post 존재 여부 확인
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
         // 댓글 목록 조회
-        List<Comment> comments = commentRepository.findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
-        Long totalCount = commentRepository.countByPostIdAndIsDeletedFalse(postId);
+        List<Comment> comments = commentRepository.findByPost_IdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
+        Long totalCount = commentRepository.countByPost_IdAndIsDeletedFalse(postId);
 
         // Comment -> CommentResponse 변환
         List<CommentResponse> commentResponses = comments.stream()
@@ -115,7 +129,7 @@ public class CommentService {
      * 댓글 수 조회 (Post Service용)
      */
     public Long getCommentCount(Long postId) {
-        return commentRepository.countByPostIdAndIsDeletedFalse(postId);
+        return commentRepository.countByPost_IdAndIsDeletedFalse(postId);
     }
 
     /**
@@ -149,24 +163,31 @@ public class CommentService {
      * 댓글 내용 표시 (권한에 따라) - 기존 로직
      */
     public String getDisplayContent(Comment comment, Long requestUserId, Long postAuthorId) {
-        if (canViewContent(comment, requestUserId, postAuthorId)) {
-            return comment.getContent();
-        }
-        return "비밀댓글입니다";
+        return canViewContent(comment, requestUserId, postAuthorId)
+                ? comment.getContent()
+                : "비밀댓글입니다";
     }
     /**
      * 실제 사용자 정보 조회(안전한 예외처리 포함)
      */
     private CommentResponse.AuthorDto getUserAuthorInfo(Long authorId) {
         try {
-            UserInfoResponse userInfo = userInfoService.getUserInfo(authorId);
+            // UserRepository 사용해서 직접 처리
+            User user = userRepository.findById(authorId)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+            // User에서 UserInfo 가져오기
+            UserInfo userInfo = user.getUserInfo();  // JPA 연관관계 활용
+
+            String nickname = userInfo != null ? userInfo.getNickname() : "사용자";
+
             return new CommentResponse.AuthorDto(
                     authorId,
-                    userInfo.getNickname() != null ? userInfo.getNickname() : "사용자",
-                    "https://api.pravatar.cc/150?img=" + (authorId % 50) // ← 임시 이미지
+                    nickname,
+                    "https://api.pravatar.cc/150?img=" + (authorId % 50)
             );
         } catch (Exception e) {
-            // 탈퇴한 사용자인 경우
+            // 실패 시 기본값
             return new CommentResponse.AuthorDto(
                     authorId,
                     "탈퇴한 사용자",

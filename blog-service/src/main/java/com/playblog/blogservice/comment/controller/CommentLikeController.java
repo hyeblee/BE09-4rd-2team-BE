@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/comments")
 @RequiredArgsConstructor
 public class CommentLikeController {
 
