@@ -2,8 +2,6 @@ package com.playblog.blogservice.comment.repository;
 
 import com.playblog.blogservice.comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,7 +14,4 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 게시글의 댓글 수 조회 (삭제되지 않은 것만)
     long countByPost_IdAndIsDeletedFalse(Long postId);
-
-    // 댓글이 존재하고 삭제되지 않았는지 확인
-    boolean existsByIdAndIsDeletedFalse(Long commentId);
 }

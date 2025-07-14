@@ -13,9 +13,6 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
     // 게시글에 공감 확인
     Optional<PostLike> findByPost_IdAndUser_Id(Long postId, Long userId);
 
-    // 게시글에 공감 여부 확인
-    boolean existsByPostIdAndUser_Id(Long postId, Long userId);
-
     // 게시글의 공감 수
     long countByPost_Id(Long postId);
 
