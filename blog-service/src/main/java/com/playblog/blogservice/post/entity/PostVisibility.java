@@ -1,4 +1,4 @@
-package com.playblog.blogservice.postservice.post.entity;
+package com.playblog.blogservice.post.entity;
 
 public enum PostVisibility {
     PUBLIC,       // 전체공개

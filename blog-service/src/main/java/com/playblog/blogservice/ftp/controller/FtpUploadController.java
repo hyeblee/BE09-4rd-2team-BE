@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.UncheckedIOException;
 
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3001")
 @RestController
 @RequestMapping("/ftp")
 @RequiredArgsConstructor

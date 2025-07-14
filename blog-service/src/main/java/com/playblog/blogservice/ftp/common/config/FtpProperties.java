@@ -1,4 +1,4 @@
-package com.playblog.blogservice.ftp.config;
+package com.playblog.blogservice.ftp.common.config;
 
 import lombok.Getter;
 import lombok.Setter;

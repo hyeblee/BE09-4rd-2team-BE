@@ -1,6 +1,6 @@
 package com.playblog.blogservice.search.entity;
 
-import com.playblog.blogservice.postservice.post.entity.Post;
+import com.playblog.blogservice.post.entity.Post;
 import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
 import lombok.*;

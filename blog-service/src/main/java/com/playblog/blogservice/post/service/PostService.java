@@ -1,14 +1,14 @@
-package com.playblog.blogservice.postservice.post.service;
+package com.playblog.blogservice.post.service;
 
 import com.playblog.blogservice.ftp.common.FtpUploader;
-import com.playblog.blogservice.ftp.config.FtpProperties;
-import com.playblog.blogservice.postservice.post.dto.PostRequestDto;
-import com.playblog.blogservice.postservice.post.dto.PostResponseDto;
-import com.playblog.blogservice.postservice.post.entity.Post;
-import com.playblog.blogservice.postservice.post.entity.PostPolicy;
-import com.playblog.blogservice.postservice.post.repository.TestLikeRepository;
-import com.playblog.blogservice.postservice.post.repository.PostPolicyRepository;
-import com.playblog.blogservice.postservice.post.repository.PostRepository;
+import com.playblog.blogservice.ftp.common.config.FtpProperties;
+import com.playblog.blogservice.post.dto.PostRequestDto;
+import com.playblog.blogservice.post.dto.PostResponseDto;
+import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.post.entity.PostPolicy;
+import com.playblog.blogservice.post.repository.TestLikeRepository;
+import com.playblog.blogservice.post.repository.PostPolicyRepository;
+import com.playblog.blogservice.post.repository.PostRepository;
 import com.playblog.blogservice.search.repository.UserRepository;
 import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;

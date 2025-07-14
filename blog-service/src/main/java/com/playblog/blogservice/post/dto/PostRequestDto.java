@@ -1,84 +1,48 @@
-package com.playblog.blogservice.postservice.post.dto;
+package com.playblog.blogservice.post.dto;
 
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
-import com.playblog.blogservice.postservice.post.entity.*;
+import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.post.entity.PostPolicy;
+import com.playblog.blogservice.post.entity.PostVisibility;
+import com.playblog.blogservice.post.entity.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import com.playblog.blogservice.user.User;
-import com.playblog.blogservice.userInfo.UserInfo;
 
 @Getter
 @Setter
+@NoArgsConstructor // 역직렬화 구조에 필요해서 (Jackson이 필요로 함)
 public class PostRequestDto {
     // 외래키
     private Long userId;
 
-    /**
-     * 게시글 제목 (필수)
-     * NotBlank: null, "", " " 모두 허용 안 함
-     */
     @NotBlank
     private String title;
 
-    /**
-     * 게시글 내용 (필수)
-     * 긴 내용 허용
-     */
     @NotBlank
     private String content;
 
-    /**
-     * 썸네일 이미지 URL (선택)
-     * 파일 업로드 후 Service 단에서 URL로 세팅
-     */
     private String thumbnailImageUrl;
 
-    /**
-     * 카테고리명 (게시글로 고정)
-     * 추가로 mainTopic/subTopic과 함께 사용
-     */
     private String category;
 
-    /**
-     * 메인 주제 (필수)
-     * Enum: ENTERTAINMENT_ARTS, LIFESTYLE 등
-     */
     @NotNull
     private TopicType mainTopic;
 
-    /**
-     * 서브 주제 (필수)
-     * Enum: LITERATURE_BOOK, MOVIE 등
-     */
     @NotNull
     private SubTopic subTopic;
 
-    /**
-     * 공개 여부 (필수)
-     * Enum: PUBLIC, PRIVATE
-     */
     @NotNull
     private PostVisibility visibility;
 
-    /**
-     * 댓글 허용 여부 (선택)
-     * PostPolicy에 전달됨
-     */
     private Boolean allowComment;
 
-    /**
-     * 좋아요 허용 여부 (선택)
-     * PostPolicy에 전달됨
-     */
     private Boolean allowLike;
 
-    /**
-     * 검색 허용 여부 (선택)
-     * PostPolicy에 전달됨
-     */
     private Boolean allowSearch;
 
     // 필요시 태그 추가
