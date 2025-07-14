@@ -7,8 +7,7 @@ import com.playblog.blogservice.postlike.dto.PostLikesResponse;
 import com.playblog.blogservice.postlike.entity.PostLike;
 import com.playblog.blogservice.postlike.repository.PostLikeRepository;
 import com.playblog.blogservice.user.User;
-import com.playblog.blogservice.userInfo.UserInfoService;
-import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
+import com.playblog.blogservice.userInfo.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 public class PostLikeService {
 
     private final UserRepository userRepository;
-    private final UserInfoService userInfoService;
     private final PostLikeRepository postLikeRepository;
 
     // 1. 게시글 공감 토글 (있으면 취소, 없으면 추가)
@@ -65,7 +63,7 @@ public class PostLikeService {
     }
 
     // 4. 게시글에 공감한 사용자 목록 조회
-    public PostLikesResponse getPostLikeUsers(Long postId, Long requestUserId) {
+    public PostLikesResponse getPostLikeUsers(Long postId) {
         List<PostLike> postLikes = postLikeRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         // PostLike들을 PostLikeUserResponse로 변환
@@ -73,12 +71,18 @@ public class PostLikeService {
                 .map(postLike -> {
                     Long userId = postLike.getUserId();
                     try {
-                        UserInfoResponse userInfo = userInfoService.getUserInfo(userId);
+                        User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+                        UserInfo userInfo = user.getUserInfo();
+                        String nickname = userInfo != null ? userInfo.getNickname() : "사용자";
+                        String profileIntro = userInfo != null ? userInfo.getProfileIntro() : "";
+
                         PostLikeUserResponse.UserDto userDto = new PostLikeUserResponse.UserDto(
                                 userId,
-                                userInfo.getNickname(),
+                                nickname,
                                 "https://api.pravatar.cc/150?img=" + (userId % 50),
-                                userInfo.getProfileIntro()
+                                profileIntro
                         );
                         return new PostLikeUserResponse(userDto, false, postLike.getCreatedAt());
                     } catch (Exception e) {

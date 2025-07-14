@@ -20,6 +20,13 @@ spring:
       hibernate:
         format_sql: true  # SQL 쿼리를 보기 좋게 들여쓰기하여 출력
 
+logging:
+  level:
+    com.playblog.blogservice: DEBUG
+    org.springframework.transaction: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
 ftp:
   server:       dev.macacolabs.site
   port:         21
