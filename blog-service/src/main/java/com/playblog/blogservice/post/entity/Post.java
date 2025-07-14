@@ -15,9 +15,12 @@ import com.playblog.blogservice.user.User;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
     /* 정책 참조 */
-    private Boolean allowComment; // 댓글 허용
-    private Boolean allowLike;    // 좋아요 허용
-    private Boolean allowSearch;  // 검색 허용
+    @Column(nullable = false)
+    private Boolean allowComment;
+    @Column(nullable = false)
+    private Boolean allowLike;
+    @Column(nullable = false)
+    private Boolean allowSearch;
 
     /* 유저 참조 */
     @ManyToOne(fetch = FetchType.LAZY)

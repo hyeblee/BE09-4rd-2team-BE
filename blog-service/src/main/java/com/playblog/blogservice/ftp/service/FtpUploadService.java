@@ -1,7 +1,7 @@
 package com.playblog.blogservice.ftp.service;
 
 import com.playblog.blogservice.ftp.common.FtpUploader;
-import com.playblog.blogservice.ftp.config.FtpProperties;
+import com.playblog.blogservice.ftp.common.config.FtpProperties;
 import com.playblog.blogservice.ftp.dto.UploadResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
