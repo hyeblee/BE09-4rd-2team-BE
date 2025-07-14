@@ -1,10 +1,11 @@
 server:
-  port: 8081
+  port: 0
 #  port: ${SERVER_PORT:8081}   # env SERVER_PORT가 있으면 그 값을, 없으면 8081을 기본으로
 
 spring:
+
   application:
-    name: USER-MANAGEMENT  # 스프링 애플리케이션 이름 (스프링 클라우드/로깅 등에 사용)
+    name: BLOG-SERVICE  # 스프링 애플리케이션 이름 (스프링 클라우드/로깅 등에 사용)
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC 드라이버 클래스 (MySQL 8.x 표준)
@@ -34,3 +35,12 @@ ftp:
   base-url:       http://dev.macacolabs.site:8008/images/2/editor
   thumb-base-url: http://dev.macacolabs.site:8008/images/2/thumb
 
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
