@@ -1,14 +1,15 @@
 package com.playblog.blogservice.postlike.service;
 
-import com.playblog.blogservice.common.repository.UserRepository;
+import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.post.repository.PostRepository;
+import com.playblog.blogservice.user.UserRepository;
 import com.playblog.blogservice.postlike.dto.PostLikeResponse;
 import com.playblog.blogservice.postlike.dto.PostLikeUserResponse;
 import com.playblog.blogservice.postlike.dto.PostLikesResponse;
 import com.playblog.blogservice.postlike.entity.PostLike;
 import com.playblog.blogservice.postlike.repository.PostLikeRepository;
 import com.playblog.blogservice.user.User;
-import com.playblog.blogservice.userInfo.UserInfoService;
-import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
+import com.playblog.blogservice.userInfo.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,62 +24,79 @@ import java.util.stream.Collectors;
 public class PostLikeService {
 
     private final UserRepository userRepository;
-    private final UserInfoService userInfoService;
+    private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
 
     // 1. 게시글 공감 토글 (있으면 취소, 없으면 추가)
     @Transactional
     public PostLikeResponse togglePostLike(Long postId, Long userId) {
-        Optional<PostLike> existingLike = postLikeRepository.findByPostIdAndUser_Id(postId, userId);
+        // 1. 게시글 존재 확인
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        // 2. 공감 허용 여부 확인
+        if (post.getAllowLike() != null && !post.getAllowLike()) {
+            throw new IllegalArgumentException("이 게시글은 공감을 허용하지 않습니다.");
+        }
+
+        // 3. 사용자 존재 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 4. 공감 여부 확인
+        Optional<PostLike> existingLike = postLikeRepository.findByPost_IdAndUser_Id(postId, userId);
 
         if (existingLike.isPresent()) {
-            // 이미 공감했으면 공감 취소
-            postLikeRepository.deleteByPostIdAndUser_Id(postId, userId);
-
-            long likeCount = postLikeRepository.countByPostId(postId);
-            return new PostLikeResponse(false, likeCount);
+            // 공감 취소
+            postLikeRepository.deleteByPost_IdAndUser_Id(postId, userId);
+            long newCount = postLikeRepository.countByPost_Id(postId);
+            return new PostLikeResponse(false, newCount);  // ✅ DTO 사용
         } else {
-            // 공감하지 않았으면 공감 추가
-            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-            PostLike newLike = PostLike.builder()
-                    .postId(postId)
+            // 공감 추가
+            PostLike postLike = PostLike.builder()
+                    .post(post)
                     .user(user)
                     .build();
-            postLikeRepository.save(newLike);
 
-            long likeCount = postLikeRepository.countByPostId(postId);
-            return new PostLikeResponse(true, likeCount);
+            postLikeRepository.save(postLike);
+            long newCount = postLikeRepository.countByPost_Id(postId);
+            return new PostLikeResponse(true, newCount);   // ✅ DTO 사용
         }
     }
 
     // 2. 게시글의 공감 수 조회
     public long getPostLikeCount(Long postId) {
-        return postLikeRepository.countByPostId(postId);
+        return postLikeRepository.countByPost_Id(postId);
     }
 
     // 3. 게시글 공감 여부 확인
     public PostLikeResponse isPostLikedByUser(Long postId, Long userId) {
-        boolean isLiked = postLikeRepository.existsByPostIdAndUser_Id(postId, userId);
-        long likeCount = postLikeRepository.countByPostId(postId);
+        boolean isLiked = postLikeRepository.findByPost_IdAndUser_Id(postId, userId).isPresent();
+        long likeCount = postLikeRepository.countByPost_Id(postId);
         return new PostLikeResponse(isLiked, likeCount);
     }
 
     // 4. 게시글에 공감한 사용자 목록 조회
-    public PostLikesResponse getPostLikeUsers(Long postId, Long requestUserId) {
-        List<PostLike> postLikes = postLikeRepository.findByPostIdOrderByCreatedAtDesc(postId);
+    public PostLikesResponse getPostLikeUsers(Long postId) {
+        List<PostLike> postLikes = postLikeRepository.findByPost_IdOrderByCreatedAtDesc(postId);
 
         // PostLike들을 PostLikeUserResponse로 변환
         List<PostLikeUserResponse> likedUsers = postLikes.stream()
                 .map(postLike -> {
                     Long userId = postLike.getUserId();
                     try {
-                        UserInfoResponse userInfo = userInfoService.getUserInfo(userId);
+                        User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+                        UserInfo userInfo = user.getUserInfo();
+                        String nickname = userInfo != null ? userInfo.getNickname() : "사용자";
+                        String profileIntro = userInfo != null ? userInfo.getProfileIntro() : "";
+
                         PostLikeUserResponse.UserDto userDto = new PostLikeUserResponse.UserDto(
                                 userId,
-                                userInfo.getNickname(),
+                                nickname,
                                 "https://api.pravatar.cc/150?img=" + (userId % 50),
-                                userInfo.getProfileIntro()
+                                profileIntro
                         );
                         return new PostLikeUserResponse(userDto, false, postLike.getCreatedAt());
                     } catch (Exception e) {

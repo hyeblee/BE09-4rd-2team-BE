@@ -1,8 +1,11 @@
 package com.playblog.blogservice.comment.entity;
 
+import com.playblog.blogservice.post.entity.Post;
 import com.playblog.blogservice.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -21,8 +24,10 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 댓글 기본 키, 자동 증가
 
-    @Column(name = "post_id", nullable = false)
-    private Long postId; // 게시글 id
+    @ManyToOne(fetch = FetchType.LAZY) //하나의 게시물의 여러개의 댓글 작성 가능
+    @JoinColumn(name = "post_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Post post; // 게시글 id
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -47,8 +52,8 @@ public class Comment {
     private LocalDateTime createdAt;
 
     @Builder
-    public Comment(Long postId, User author, String content, Boolean isSecret) {
-        this.postId = postId;
+    public Comment(Post post, User author, String content, Boolean isSecret) {
+        this.post = post;
         this.author = author;
         this.content = content;
         this.isSecret = isSecret != null ? isSecret : false; // null 체크

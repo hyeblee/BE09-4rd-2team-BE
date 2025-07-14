@@ -4,6 +4,8 @@ import com.playblog.blogservice.comment.dto.CommentRequest;
 import com.playblog.blogservice.comment.dto.CommentResponse;
 import com.playblog.blogservice.comment.dto.CommentsResponse;
 import com.playblog.blogservice.comment.service.CommentService;
+import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +16,11 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+//@RequestMapping("/api")
 public class CommentController {
 
     private final CommentService commentService;
+    private final PostRepository postRepository;
 
     /**
      * 댓글 작성
@@ -38,12 +41,15 @@ public class CommentController {
     }
 
     /**
-     * 댓글 목록 조회
+     * 댓글 목록 조회 - post(게시글)에서 작성자 id 가져오기
      */
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentsResponse> getComments(@PathVariable Long postId, @RequestHeader(value = "X-User-Id", defaultValue = "0") Long requestUserId) {
 
-        Long postAuthorId = 1L; // TODO: Post Service에서 게시글 작성자 ID 가져오기
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+        Long postAuthorId = post.getUser()!=null?post.getUser().getId():null;
 
         CommentsResponse response = commentService.getCommentsByPostId(postId, requestUserId, postAuthorId);
 

@@ -1,17 +1,9 @@
 package com.playblog.blogservice.post.controller;
 
-import com.playblog.blogservice.common.repository.UserRepository;
-import com.playblog.blogservice.ftp.common.FtpUploader;
 import com.playblog.blogservice.post.dto.PostRequestDto;
 //import com.playblog.blogservice.postservice.post.dto.PostResponseDto;
 import com.playblog.blogservice.post.dto.PostResponseDto;
-import com.playblog.blogservice.post.entity.Post;
-import com.playblog.blogservice.post.entity.PostPolicy;
-import com.playblog.blogservice.post.repository.PostPolicyRepository;
-import com.playblog.blogservice.post.repository.PostRepository;
 import com.playblog.blogservice.post.service.PostService;
-import com.playblog.blogservice.user.User;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-
 @RestController
 @RequestMapping(path = "/posts")
 @RequiredArgsConstructor
@@ -33,10 +23,6 @@ import java.net.URI;
 public class PostController {
 
     private final PostService postService;
-    private final PostRepository postRepository;
-    private final UserRepository userRepository;
-    private final FtpUploader ftpUploader;    // FTP 업로더 주입
-    private final PostPolicyRepository postPolicyRepository;
 
     /* 게시글 발행 */
     /**
@@ -47,56 +33,33 @@ public class PostController {
      */
 //    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 // 스프링이 기본 컨버터를 통해 multipart/form-data 처리도 자동으로 지원
-    /*@PostMapping
+    @PostMapping
     public ResponseEntity<PostResponseDto> publishPost(
             @Valid @RequestPart("requestDto") PostRequestDto requestDto,
             @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile
-        // 썸네일 파일은 multipart 요청의 또 다른 부분이며, 선택 사항입니다.
-    ){
-        // 1) 유저 조회
-        User user = userRepository.findById(requestDto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
+            // 썸네일 파일은 multipart 요청의 또 다른 부분이며, 선택 사항입니다.
 
-        // 2) 썸네일 FTP 저장 (Optional)
-        if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
-            String thumbUrl = ftpUploader.upload(thumbnailFile);
-            requestDto.setThumbnailImageUrl(thumbUrl);
-        }
+    ) throws Exception {
+        // 로그로 게시물 제목을 출력하여 요청이 들어왔음을 기록합니다
+        log.info("[POST] /api/posts - publishPost called with title='{}'", requestDto.getTitle());
 
-        // 3) Post + Policy 생성
-        Post post = postRepository.save(requestDto.toEntity(user));
-        PostPolicy policy = requestDto.toPolicyEntity(post);
-        postRepository.save(policy);
+        // 게시물 작성 로직을 서비스 레이어에 위임하고 결과를 받아옵니다.
+        PostResponseDto response = postService.publishPost(requestDto, thumbnailFile);
 
-        // 4) 응답
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(postService.toResponse(post, policy, *//*currentUserId=*//* null));
-        }*/
-
-    /* 게시글 생성(발행) */
-    @PostMapping
-    public ResponseEntity<PostResponseDto> publishPost(
-            @RequestBody @Valid PostRequestDto dto
-    ) {
-        // 1) 유저 조회
-        User user = userRepository.getReferenceById(dto.getUserId());
-
-        // 2) Post + Policy 저장
-        Post post = postRepository.save(dto.toEntity(user));
-        PostPolicy policy = postPolicyRepository.save(dto.toPolicyEntity(post));
-
-        // 3) 응답 DTO 반환
-        // Location 헤더에 사용할 URI를 생성합니다.
-        // 현재 요청 URI(/api/posts)에 "/{id}" 경로를 붙이고, 실제 생성된 postId로 치환합니다.
-        PostResponseDto response = postService.toResponse(post, policy, /* currentUserId */ null);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+        // 응답 Location 헤더에 사용할 URL을 생성합니다. (/api/posts/{id} 형태)
+        String location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(response.getPostId())
-                .toUri();
-        return ResponseEntity.created(location).body(response);
-    }
+                .toUriString();
 
+        // 게시물이 성공적으로 생성되었음을 로그로 기록합니다.
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.LOCATION, location);
+
+        // 게시물 응답 데이터와 Location 헤더를 포함하여 201(CREATED) 상태코드로 반환합니다.
+        log.info("[POST] /api/posts - created post id={} at {}", response.getPostId(), location);
+        return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
+    }
 
     /* 게시글 상세 조회 */
     @GetMapping("/main/{postId}")
