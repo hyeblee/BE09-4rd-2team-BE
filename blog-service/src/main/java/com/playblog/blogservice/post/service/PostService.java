@@ -1,7 +1,7 @@
 package com.playblog.blogservice.post.service;
 
 import com.playblog.blogservice.ftp.common.FtpUploader;
-import com.playblog.blogservice.ftp.config.FtpProperties;
+import com.playblog.blogservice.ftp.common.config.FtpProperties;
 import com.playblog.blogservice.post.dto.PostRequestDto;
 import com.playblog.blogservice.post.dto.PostResponseDto;
 import com.playblog.blogservice.post.entity.Post;
@@ -9,7 +9,7 @@ import com.playblog.blogservice.post.entity.PostPolicy;
 import com.playblog.blogservice.post.repository.TestLikeRepository;
 import com.playblog.blogservice.post.repository.PostPolicyRepository;
 import com.playblog.blogservice.post.repository.PostRepository;
-import com.playblog.blogservice.common.repository.UserRepository;
+import com.playblog.blogservice.user.UserRepository;
 import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.EntityNotFoundException;

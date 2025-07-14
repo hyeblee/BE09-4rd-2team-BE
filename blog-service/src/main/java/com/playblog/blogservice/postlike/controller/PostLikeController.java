@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+//@RequestMapping("/api")
 public class PostLikeController {
 
     private final PostLikeService postLikeService;
@@ -38,12 +38,8 @@ public class PostLikeController {
      * 공감한 블로거 목록 조회
      */
     @GetMapping("/posts/{postId}/likes")
-    public ResponseEntity<PostLikesResponse> getPostLikes(
-            @PathVariable Long postId,
-            @RequestHeader(value = "X-User-Id", defaultValue = "0") Long requestUserId
-    ) {
-        PostLikesResponse response = postLikeService.getPostLikeUsers(postId, requestUserId);
-
+    public ResponseEntity<PostLikesResponse> getPostLikes(@PathVariable Long postId) {
+        PostLikesResponse response = postLikeService.getPostLikeUsers(postId);
         return ResponseEntity.ok(response);
     }
 
