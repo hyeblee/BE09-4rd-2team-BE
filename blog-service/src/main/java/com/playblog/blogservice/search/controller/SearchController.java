@@ -12,13 +12,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class SearchController {
     private final SearchService searchService;
     /**
@@ -100,18 +101,31 @@ public class SearchController {
 
     /**
      * 특정 사용자의 이웃 게시글 조회 API
-     * @param userId 사용자 ID
+     * @param authentication 인증 정보 (사용자 ID 포함)
      * @param page 페이지 번호 (기본값: 0)
      * @param size 페이지 크기 (기본값: 10)
      * @return ResponseEntity<ApiResponse<Page<PostSummaryDto>>> 이웃 게시글 목록
      */
-//    @GetMapping("/neighbors")
+    @GetMapping("/neighbors")
+    public ResponseEntity<ApiResponse<Page<PostSummaryDto>>> getNeighborPosts(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        String userIdStr = authentication.getName();
+        Long userId = Long.parseLong(userIdStr);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
+        Page<PostSummaryDto> neighborPosts = searchService.getNeighborPosts(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(neighborPosts));
+    }
+
+//    @GetMapping("/neighbors/test")
 //    public ResponseEntity<ApiResponse<Page<PostSummaryDto>>> getNeighborPosts(
 //            @RequestParam Long userId,
 //            @RequestParam(defaultValue = "0") int page,
 //            @RequestParam(defaultValue = "10") int size
 //    ) {
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
 //        Page<PostSummaryDto> neighborPosts = searchService.getNeighborPosts(userId, pageable);
 //        return ResponseEntity.ok(ApiResponse.success(neighborPosts));
 //    }

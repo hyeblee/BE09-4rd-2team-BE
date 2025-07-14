@@ -1,26 +1,48 @@
 server:
   port: 8000
+
 spring:
   config:
-    import: application-secret.yml  # 시크릿 키 숨기기
+    import: application-secret.yml
   application:
     name: gateway-server
   cloud:
     gateway:
       routes:
-        - id: user-management  # 이 라우트의 식별자 (아무 이름이나 가능)
-          uri: lb://USER-MANAGEMENT # 라우팅 대상 (Eureka에 등록된 서비스 이름)
-          predicates: # 어떤 요청을 이 라우트로 보낼지 정의
-            - Path=/api/user-management/** # 이 경로로 들어오는 요청만 처리함
-          filters:  # 실제로 라우팅할 때 요청을 어떻게 가공할지 정의
-            - RewritePath=/api/user-management/(?<segment>.*), /api/users/$\{segment}
+        - id: user-management-users
+          uri: lb://USER-MANAGEMENT
+          predicates:
+            - Path=/api/user-management/users/**
+          filters:
+            - RewritePath=/api/user-management/users/(?<segment>.*), /api/users/$\{segment}
+
+        - id: user-management-auth
+          uri: lb://USER-MANAGEMENT
+          predicates:
+            - Path=/api/user-management/auth/**
+          filters:
+            - RewritePath=/api/user-management/auth/(?<segment>.*), /auth/$\{segment}
 
         - id: blog-service
-          uri: http://BLOG-SERVICE  # Blog Service 직접 연결
+          uri: lb://BLOG-SERVICE
           predicates:
             - Path=/api/blog-service/**
           filters:
-            - RewritePath=/api/blog-service/(?<segment>.*), /${segment}
+            - RewritePath=/api/blog-service/(?<segment>.*), /$\{segment}
+
+      globalcors:  # ✅ 이 들여쓰기로 수정
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
 
 eureka:
   client:
