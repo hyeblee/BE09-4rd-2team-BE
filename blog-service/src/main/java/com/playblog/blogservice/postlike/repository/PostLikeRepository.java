@@ -11,17 +11,14 @@ import java.util.Optional;
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
     // 게시글에 공감 확인
-    Optional<PostLike> findByPostIdAndUser_Id(Long postId, Long userId);
-
-    // 게시글에 공감 여부 확인
-    boolean existsByPostIdAndUser_Id(Long postId, Long userId);
+    Optional<PostLike> findByPost_IdAndUser_Id(Long postId, Long userId);
 
     // 게시글의 공감 수
-    long countByPostId(Long postId);
+    long countByPost_Id(Long postId);
 
     // 게시글에 공감한 사용자 목록 (최신순)
-    List<PostLike> findByPostIdOrderByCreatedAtDesc(Long postId);
+    List<PostLike> findByPost_IdOrderByCreatedAtDesc(Long postId);
 
     // 게시글 공감 삭제
-    void deleteByPostIdAndUser_Id(Long postId, Long userId);
+    void deleteByPost_IdAndUser_Id(Long postId, Long userId);
 }

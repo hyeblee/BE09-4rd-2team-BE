@@ -9,7 +9,7 @@ import com.playblog.blogservice.post.entity.PostPolicy;
 import com.playblog.blogservice.post.repository.TestLikeRepository;
 import com.playblog.blogservice.post.repository.PostPolicyRepository;
 import com.playblog.blogservice.post.repository.PostRepository;
-import com.playblog.blogservice.search.repository.UserRepository;
+import com.playblog.blogservice.user.UserRepository;
 import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.EntityNotFoundException;
