@@ -88,4 +88,12 @@ public class NeighborDtoMapper {
                 toUser.getProfileImageUrl()
         );
     }
+
+    public BlockedForMeNeighborDto blockedForMeNeighborDto(Neighbor neighbor){
+        UserInfo toUser = neighbor.getToUserInfo();
+        return new BlockedForMeNeighborDto(
+                toUser.getId(),
+                toUser.getNickname()
+        );
+    }
 }

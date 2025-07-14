@@ -340,6 +340,12 @@ public class NeighborService {
             }
         }
     }
+
+    public List<Neighbor> getBlockedNeighbors(Long userId) {
+        UserInfo me = userInfoRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        return neighborRepository.findByFromUserInfoAndStatus(me, REMOVED);
+    }
 }
 
 

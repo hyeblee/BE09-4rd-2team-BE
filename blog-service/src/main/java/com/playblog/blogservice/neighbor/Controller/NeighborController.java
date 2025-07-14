@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/neighbors")
 @RequiredArgsConstructor
@@ -32,7 +31,6 @@ public class NeighborController {
     public ResponseEntity<List<MyAddedForMeNeighborDto>> getMyAddedNeighbors(
             @AuthenticationPrincipal String userIdStr
     ) {
-        log.info("받은 userId: {}", userIdStr);
         if (userIdStr == null) throw new RuntimeException("로그인 필요");
         Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
 
@@ -56,8 +54,11 @@ public class NeighborController {
 
     @GetMapping("/my-following/received")
     public ResponseEntity<List<MyAddedToMeNeighborDto>> getMyReceivedNeighbors(
-            @AuthenticationPrincipal Long userId
+            @AuthenticationPrincipal String userIdStr
     ) {
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         List<Neighbor> neighbors = neighborService.getAddedToMeNeighbors(userId);
 
         List<Neighbor> reverseNeighbors = neighborService.getAddedForMeNeighbors(userId);
@@ -70,8 +71,11 @@ public class NeighborController {
     // 내가 보낸 서로이웃
     @GetMapping("/my-following/sent-mutual")
     public ResponseEntity<List<SentMutualNeighborDto>> getSentMutualNeighbors(
-            @AuthenticationPrincipal Long userId
+            @AuthenticationPrincipal String userIdStr
     ) {
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         List<Neighbor> neighbors = neighborService.getSentMutualNeighbors(userId);
         List<SentMutualNeighborDto> result = neighbors.stream()
                 .map(neighborDtoMapper::toSentMutualDto)
@@ -82,8 +86,11 @@ public class NeighborController {
     // 내가 받은 서로이웃
     @GetMapping("/my-following/received-mutual")
     public ResponseEntity<List<ReceivedMutualNeighborDto>> getReceivedMutualNeighbors(
-            @AuthenticationPrincipal Long userId
+            @AuthenticationPrincipal String userIdStr
     ) {
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         List<Neighbor> neighbors = neighborService.getReceivedMutualNeighbors(userId);
         List<ReceivedMutualNeighborDto> result = neighbors.stream()
                 .map(neighborDtoMapper::toReceivedMutualDto)
@@ -96,18 +103,24 @@ public class NeighborController {
     // 이웃 요청(다수)
     @PatchMapping("/accept")
     public ResponseEntity<Void> insertNeighbors(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal String userIdStr,
             @RequestBody List<Long> insertUserIds
     ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         neighborService.acceptNeighborsStatus(userId,insertUserIds);
         return ResponseEntity.noContent().build();
     }
     // 이웃 요청(한명)
     @PatchMapping("/{insertUserId}/accept")
     public ResponseEntity<Void> insertNeighbor(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal String userIdStr,
             @PathVariable Long insertUserId
     ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         neighborService.acceptNeighbor(userId,insertUserId);
         return ResponseEntity.noContent().build();
     }
@@ -116,9 +129,12 @@ public class NeighborController {
     // 서로이웃 수락(단체)
     @PostMapping("/batch-accept")
     public ResponseEntity<Void> acceptMultipleNeighbors(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal String userIdStr,
             @RequestBody List<Long> Ids
     ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         neighborService.accpetMultipleNeighbors(userId,Ids);
         return ResponseEntity.noContent().build();
     }
@@ -126,35 +142,47 @@ public class NeighborController {
     // 서로 이웃 거절(단체)
     @PostMapping("/batch-rejected")
     public ResponseEntity<Void> rejectMultipleNeighbors(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal String userIdStr,
             @RequestBody List<Long> Ids
     ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         neighborService.rejectMultipleNeighbors(userId,Ids);
         return ResponseEntity.noContent().build();
     }
     // 이웃관계 삭제
     @DeleteMapping("/delete")
     public ResponseEntity<Void> rejectAllNeighbors(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal String userIdStr,
             @RequestBody List<Long> deleteUserId
     ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         neighborService.rejectAllRelationNeighbor(userId,deleteUserId);
         return ResponseEntity.noContent().build();
     }
     @PostMapping("/batch-change")
     public ResponseEntity<Void> changeRelationNeighbors(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal String userIdStr,
             @RequestBody List<Long> changeUserId
     ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         neighborService.changeRelationNeighbor(userId,changeUserId);
         return ResponseEntity.noContent().build();
     }
     // 내가 보낸 신청 취소
     @PostMapping("/batch-cancel")
     public ResponseEntity<Void> cancelRequestNeighbors(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal String userIdStr,
             @RequestBody List<Long> cancelUserIds
     ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         neighborService.cancelRequestNeighbors(userId,cancelUserIds);
         return ResponseEntity.noContent().build();
     }
@@ -162,10 +190,27 @@ public class NeighborController {
     // 유저 차단
     @PostMapping("/batch-block")
     public ResponseEntity<Void> blockNeighbors(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal String userIdStr,
             @RequestBody List<Long> blockUserIds
             ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         neighborService.blockNeighbors(userId,blockUserIds);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 차단 유저 조회
+    @GetMapping("/blocked")
+    public ResponseEntity<Void> blockedNeighbors(
+            @AuthenticationPrincipal String userIdStr
+    ){
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);
+        List<Neighbor> blockedNeighbors = neighborService.getBlockedNeighbors(userId);
+        List<BlockedForMeNeighborDto> result = blockedNeighbors.stream()
+                .map(neighborDtoMapper::blockedForMeNeighborDto)
+                .toList();
         return ResponseEntity.noContent().build();
     }
 }
