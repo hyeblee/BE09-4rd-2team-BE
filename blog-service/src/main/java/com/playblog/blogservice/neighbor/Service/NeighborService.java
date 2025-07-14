@@ -159,7 +159,7 @@ public class NeighborService {
         UserInfo me = userInfoRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다"));
 
-        return neighborRepository.findByFromUserInfoAndStatusIn(me,   List.of(NeighborStatus.ACCEPTED, NeighborStatus.REQUESTED));
+        return neighborRepository.findByFromUserInfoAndStatusIn(me, List.of(NeighborStatus.ACCEPTED, NeighborStatus.REQUESTED));
     }
     // 나를 추가한 이웃 조회
     public List<Neighbor> getAddedToMeNeighbors(Long userId) {
