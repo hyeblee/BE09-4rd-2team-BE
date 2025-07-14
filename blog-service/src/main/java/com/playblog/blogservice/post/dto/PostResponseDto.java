@@ -55,43 +55,46 @@ public class PostResponseDto {
 // 백에서 DTO 호출시 보이거나 동작하지 않는건 갖고 오지 않는다.
 // 엔터티는 DB용일뿐 그이상 그이하도 아니다.
 
+    // DTO
+
+    // Post 엔티티가 policy를 가지고 있지 않은 단방향 구조라면, DTO 생성 시점에 서비스 레이어에서
+    // PostPolicy를 별도로 조회해서 함께 넘겨줘야 합니다. 즉, from(...) 시그니처를 이렇게 바꿔주세요.
     public static PostResponseDto from(
             Post post,
+            PostPolicy policy,      // 추가
             UserInfo userInfo,
-            PostPolicy policy,
             Long likeCount,
             Boolean isLiked
     ) {
         return PostResponseDto.builder()
+                /* 게시글 기본 */
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .visibility(post.getVisibility())
+
+                /* 정책 필드 */
                 .allowComment(policy != null ? policy.getAllowComment() : false)
-                .allowLike(policy != null ? policy.getAllowLike() : false)
-                .allowSearch(policy != null ? policy.getAllowSearch() : false)
+                .allowLike   (policy != null ? policy.getAllowLike()    : false)
+                .allowSearch (policy != null ? policy.getAllowSearch()  : false)
+
+                /* 작성자 정보 */
                 .blogTitle(userInfo != null ? userInfo.getBlogTitle() : "임시 블로그")
-                .nickname(userInfo != null ? userInfo.getNickname() : "임시 닉네임")
+                .nickname (userInfo != null ? userInfo.getNickname()  : "임시 닉네임")
                 .profileImageUrl(userInfo != null ? userInfo.getProfileImageUrl() : null)
-                .likeCount(likeCount != null ? likeCount : 0L)
-                .isLiked(isLiked)
+
+                /* 좋아요 */
+                .likeCount(likeCount  != null ? likeCount  : 0L)
+                .isLiked  (isLiked    != null ? isLiked    : false)
+
+                /* 주제·썸네일 */
+                .mainTopic(post.getMainTopic())
+                .subTopic (post.getSubTopic())
+                .thumbnailImageUrl(post.getThumbnailImageUrl())
+
                 .build();
     }
 
-    public static PostResponseDto fromEntity(Post post) {
-        return PostResponseDto.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .visibility(post.getVisibility())
-                .allowComment(post.getAllowComment())
-                .allowLike(post.getAllowLike())
-                .allowSearch(post.getAllowSearch())
-                .thumbnailImageUrl(post.getThumbnailImageUrl())
-                .mainTopic(post.getMainTopic())
-                .subTopic(post.getSubTopic())
-                .build();
-    }
 
 
 //    Null값 포스트

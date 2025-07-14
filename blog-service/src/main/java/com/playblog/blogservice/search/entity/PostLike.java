@@ -1,3 +1,4 @@
+/*
 package com.playblog.blogservice.search.entity;
 
 import com.playblog.blogservice.post.entity.Post;
@@ -28,3 +29,4 @@ public class PostLike {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }
+*/

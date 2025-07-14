@@ -6,10 +6,10 @@ import com.playblog.blogservice.post.dto.PostRequestDto;
 import com.playblog.blogservice.post.dto.PostResponseDto;
 import com.playblog.blogservice.post.entity.Post;
 import com.playblog.blogservice.post.entity.PostPolicy;
-import com.playblog.blogservice.post.repository.TestLikeRepository;
 import com.playblog.blogservice.post.repository.PostPolicyRepository;
 import com.playblog.blogservice.post.repository.PostRepository;
-import com.playblog.blogservice.search.repository.UserRepository;
+import com.playblog.blogservice.common.repository.UserRepository;
+import com.playblog.blogservice.postlike.repository.PostLikeRepository;
 import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,9 +28,10 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostPolicyRepository postPolicyRepository;
     private final UserRepository userRepository;
-    private final TestLikeRepository testLikeRepository;
+    private final PostLikeRepository postLikeRepository;
     // FtpProperties 주입
     private final FtpProperties ftpProperties;
+
 
 
     @Transactional
@@ -87,7 +88,7 @@ public class PostService {
         PostPolicy policy = postPolicyRepository.findByPostId(post.getId())
                 .orElseThrow(() -> new EntityNotFoundException("정책 없음"));
 
-        Long likeCount = testLikeRepository.countByPostId(post.getId());;    // 공감 수
+        Long likeCount = postLikeRepository.countByPostId(post.getId());;    // 공감 수
         Boolean isLiked = null; // (현재) 로그인 사용자 없으면 판단 불가
 //        Boolean isLiked = likeRepository.existsByPostIdAndUserId((post.getId(), currentUserId);   // 사용자가 눌렀는지
 
@@ -133,6 +134,8 @@ public class PostService {
     }
 
 
+    public PostResponseDto toResponse(Post post, PostPolicy policy, Object o) {
+    }
 }
 
 

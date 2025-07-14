@@ -5,7 +5,6 @@ import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.post.entity.Post;
 import com.playblog.blogservice.post.entity.PostPolicy;
 import com.playblog.blogservice.post.entity.PostVisibility;
-import com.playblog.blogservice.post.entity.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -19,34 +18,30 @@ import com.playblog.blogservice.user.User;
 public class PostRequestDto {
     // 외래키
     private Long userId;
-
     @NotBlank
     private String title;
-
     @NotBlank
     private String content;
-
     private String thumbnailImageUrl;
-
     private String category;
 
     @NotNull
     private TopicType mainTopic;
-
     @NotNull
     private SubTopic subTopic;
-
     @NotNull
+
     private PostVisibility visibility;
 
     private Boolean allowComment;
-
     private Boolean allowLike;
-
     private Boolean allowSearch;
 
     // 필요시 태그 추가
     // private List<String> tags;
+
+    // (thumbnail URL이나 파일은 MultipartFile로 컨트롤러에서 분리)
+
 
     /**
      * PostRequestDto → Post Entity 변환

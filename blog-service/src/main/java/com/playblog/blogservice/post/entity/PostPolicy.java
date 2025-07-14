@@ -12,10 +12,8 @@ import lombok.*;
 public class PostPolicy {
     @Id
     private Long id; // Post의 PK와 같음
-
-    @OneToOne
-    @JoinColumn(name = "id")
-    @MapsId // Post의 PK 공유
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     private Boolean allowComment; // 댓글 허용

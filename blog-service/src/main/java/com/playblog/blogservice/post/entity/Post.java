@@ -12,18 +12,20 @@ import com.playblog.blogservice.user.User;
 @Entity
 @Getter
 @Setter(AccessLevel.PACKAGE)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Post {
     /* 정책 참조 */
-    @Column(nullable = false)
+  /*  @Column(nullable = false)
     private Boolean allowComment;
     @Column(nullable = false)
     private Boolean allowLike;
     @Column(nullable = false)
-    private Boolean allowSearch;
+    private Boolean allowSearch;*/
 
     /* 유저 참조 */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

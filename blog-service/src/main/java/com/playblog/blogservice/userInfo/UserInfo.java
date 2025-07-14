@@ -31,7 +31,6 @@ public class UserInfo {
   String profileIntro; // 프로필 소개글
   String profileImageUrl; // 프로필 이미지 URL
 
-
   // Neighbor은 단방향 참조 예정..
  @OneToMany(mappedBy = "fromUserInfo")
   private List<Neighbor> followingList;
