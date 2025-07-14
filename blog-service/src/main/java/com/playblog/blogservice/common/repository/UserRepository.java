@@ -1,4 +1,4 @@
-package com.playblog.blogservice.search.repository;
+package com.playblog.blogservice.common.repository;
 
 import com.playblog.blogservice.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -34,4 +34,10 @@ public interface NeighborRepository extends JpaRepository<Neighbor,Long> {
     List<Neighbor> findByFromUserInfoIdInAndToUserInfoIdAndStatus(List<Long> attr0, Long attr1, NeighborStatus status);
 
     List<Long> findFollowingUserIdsById(Long myUserId);
+
+    Optional<Neighbor> findByFromUserInfoAndToUserInfoAndStatus(UserInfo me, UserInfo other, NeighborStatus neighborStatus);
+
+    // 내가 추가한 이웃 + 서로이웃 모두 조회
+    @Query("select n.toUserInfo.id from Neighbor n where n.fromUserInfo.id = :myUserId and (n.status = 'ACCEPTED' or n.status = 'REQUESTED')")
+    List<Long> findFollowingUserIdsByFromUserId(@Param("myUserId") Long myUserId);
 }
