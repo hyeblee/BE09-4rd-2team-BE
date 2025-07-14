@@ -8,6 +8,7 @@ import com.playblog.blogservice.neighbor.mapper.NeighborDtoMapper;
 import com.playblog.blogservice.userInfo.UserInfo;
 import com.playblog.blogservice.userInfo.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/neighbors")
@@ -24,14 +25,17 @@ import java.util.stream.Collectors;
 public class NeighborController {
     private final NeighborService neighborService;
     private final NeighborDtoMapper neighborDtoMapper;
-    private final UserInfoRepository userInfoRepository;
 
 
     // 내가 요청한 이웃(내가 추가)
     @GetMapping("/my-following/added")
     public ResponseEntity<List<MyAddedForMeNeighborDto>> getMyAddedNeighbors(
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal String userIdStr
     ) {
+        log.info("받은 userId: {}", userIdStr);
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
+
         List<Neighbor> neighbors = neighborService.getAddedForMeNeighbors(userId);
 
         // reverse 관계들 미리 조회해서 Map으로 만듦
@@ -52,7 +56,7 @@ public class NeighborController {
 
     @GetMapping("/my-following/received")
     public ResponseEntity<List<MyAddedToMeNeighborDto>> getMyReceivedNeighbors(
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal Long userId
     ) {
         List<Neighbor> neighbors = neighborService.getAddedToMeNeighbors(userId);
 
@@ -66,7 +70,7 @@ public class NeighborController {
     // 내가 보낸 서로이웃
     @GetMapping("/my-following/sent-mutual")
     public ResponseEntity<List<SentMutualNeighborDto>> getSentMutualNeighbors(
-            @RequestHeader("X-User-Id") Long userId
+            @AuthenticationPrincipal Long userId
     ) {
         List<Neighbor> neighbors = neighborService.getSentMutualNeighbors(userId);
         List<SentMutualNeighborDto> result = neighbors.stream()
@@ -92,7 +96,7 @@ public class NeighborController {
     // 이웃 요청(다수)
     @PatchMapping("/accept")
     public ResponseEntity<Void> insertNeighbors(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody List<Long> insertUserIds
     ){
         neighborService.acceptNeighborsStatus(userId,insertUserIds);
@@ -101,7 +105,7 @@ public class NeighborController {
     // 이웃 요청(한명)
     @PatchMapping("/{insertUserId}/accept")
     public ResponseEntity<Void> insertNeighbor(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long insertUserId
     ){
         neighborService.acceptNeighbor(userId,insertUserId);
@@ -112,7 +116,7 @@ public class NeighborController {
     // 서로이웃 수락(단체)
     @PostMapping("/batch-accept")
     public ResponseEntity<Void> acceptMultipleNeighbors(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody List<Long> Ids
     ){
         neighborService.accpetMultipleNeighbors(userId,Ids);
@@ -122,7 +126,7 @@ public class NeighborController {
     // 서로 이웃 거절(단체)
     @PostMapping("/batch-rejected")
     public ResponseEntity<Void> rejectMultipleNeighbors(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody List<Long> Ids
     ){
         neighborService.rejectMultipleNeighbors(userId,Ids);
@@ -131,7 +135,7 @@ public class NeighborController {
     // 이웃관계 삭제
     @DeleteMapping("/delete")
     public ResponseEntity<Void> rejectAllNeighbors(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody List<Long> deleteUserId
     ){
         neighborService.rejectAllRelationNeighbor(userId,deleteUserId);
@@ -139,7 +143,7 @@ public class NeighborController {
     }
     @PostMapping("/batch-change")
     public ResponseEntity<Void> changeRelationNeighbors(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody List<Long> changeUserId
     ){
         neighborService.changeRelationNeighbor(userId,changeUserId);
@@ -148,7 +152,7 @@ public class NeighborController {
     // 내가 보낸 신청 취소
     @PostMapping("/batch-cancel")
     public ResponseEntity<Void> cancelRequestNeighbors(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody List<Long> cancelUserIds
     ){
         neighborService.cancelRequestNeighbors(userId,cancelUserIds);
@@ -158,7 +162,7 @@ public class NeighborController {
     // 유저 차단
     @PostMapping("/batch-block")
     public ResponseEntity<Void> blockNeighbors(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody List<Long> blockUserIds
             ){
         neighborService.blockNeighbors(userId,blockUserIds);
