@@ -1,5 +1,5 @@
 server:
-  port: 9000
+  port: 0
 #  port: ${SERVER_PORT:8081}   # env SERVER_PORT가 있으면 그 값을, 없으면 8081을 기본으로
 
 spring:
