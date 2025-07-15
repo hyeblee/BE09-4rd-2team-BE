@@ -16,7 +16,8 @@ import com.playblog.blogservice.user.User;
 @Setter
 @NoArgsConstructor // 역직렬화 구조에 필요해서 (Jackson이 필요로 함)
 public class PostRequestDto {
-    // 외래키
+
+    // 게시글 정보
     private Long userId;
     @NotBlank
     private String title;
@@ -27,12 +28,14 @@ public class PostRequestDto {
 
     @NotNull
     private TopicType mainTopic;
+
     @NotNull
     private SubTopic subTopic;
-    @NotNull
 
+    @NotNull
     private PostVisibility visibility;
 
+    // 정책 정보
     private Boolean allowComment;
     private Boolean allowLike;
     private Boolean allowSearch;

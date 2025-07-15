@@ -36,6 +36,7 @@ public class PostService {
 
         User user = userRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        Post post = postRepository.save(requestDto.toEntity(user));
 
 
         // 1. FTP 업로드
@@ -56,10 +57,10 @@ public class PostService {
         requestDto.setCategory("게시글");
 
         // 4. Post 저장
-        Post post = postRepository.save(requestDto.toEntity(user));
+        Post post1 = postRepository.save(requestDto.toEntity(user));
 
         // 5. PostPolicy 저장
-        PostPolicy policy = requestDto.toPolicyEntity(post);
+        PostPolicy policy = requestDto.toPolicyEntity(post1);
         postPolicyRepository.save(policy);
 
         // 6. 작성자 정보 + 상세 응답 형태로 가공

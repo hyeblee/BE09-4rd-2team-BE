@@ -122,7 +122,6 @@ public class Post {
             String title,
             String content,
             PostVisibility visibility,
-
             String thumbnailImageUrl,
             TopicType mainTopic,
             SubTopic subTopic
