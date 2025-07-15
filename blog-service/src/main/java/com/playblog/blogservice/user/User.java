@@ -30,6 +30,9 @@ public class User {
   private long id;
 
   @Column(nullable = false)
+  private String emailId;
+
+  @Column(nullable = false)
   private String password;
 
   @Enumerated(EnumType.STRING)
