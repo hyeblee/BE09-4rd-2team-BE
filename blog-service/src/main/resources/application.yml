@@ -1,26 +1,52 @@
 server:
-  port: 8081  # 서버 실행 포트
+  port: 8081
+#  port: ${SERVER_PORT:8081}   # env SERVER_PORT가 있으면 그 값을, 없으면 8081을 기본으로
 
 spring:
+  config:
+    import: application-secret.yml  # 비밀 설정 파일을 가져옴
   application:
-    name: USER-MANAGEMENT  # 스프링 애플리케이션 이름 (스프링 클라우드/로깅 등에 사용)
-
+    name: BLOG-SERVICE  # 스프링 애플리케이션 이름 (스프링 클라우드/로깅 등에 사용)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC 드라이버 클래스 (MySQL 8.x 표준)
-    url: jdbc:mysql://mysql.coffit.xyz:3322/vldb  # 연결할 MySQL DB URL
+    url: jdbc:mysql://mysql.macacolabs.site:3322/vldb  # 연결할 MySQL DB URL
     username: vlog  # DB 사용자 계정
     password: vlog  # DB 비밀번호
 
   jpa:
     hibernate:
-      ddl-auto: create  # 스키마 자동 생성 전략 (create: 실행 시 기존 테이블 삭제 후 새로 생성)
-    show-sql: true  # 실행되는 SQL 쿼리 로그 출력
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true  # SQL 쿼리를 보기 좋게 들여쓰기하여 출력
 
-# 아래는 JWT 관련 설정 (현재 주석 처리됨)
-# jwt:
-#   secret: LH9QZL8upsPBfuDY+Dkb1kT9DZIIUSuA2u4O6Lfi3mkEfeWtETpVTcR/8SMZdJWn/xNTuCQBE6rBvDXgnVmscQ==
-#   expiration: 1800000 # 액세스 토큰 만료 시간(ms) → 30분
-#   refresh-expiration: 604800000 # 리프레시 토큰 만료 시간(ms) → 7일
+logging:
+  level:
+    com.playblog.blogservice: DEBUG
+    org.springframework.transaction: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+ftp:
+  server:       dev.macacolabs.site
+  port:         21
+  user:         ${FTP_USER}
+  pass:         ${FTP_PASS}
+
+  # 원본 이미지 저장 디렉토리
+  editor-dir:   /images/2/editor
+  # 썸네일 저장 디렉토리
+  thumb-dir:    /images/2/thumb
+
+  base-url:       http://dev.macacolabs.site:8008/images/2/editor
+  thumb-base-url: http://dev.macacolabs.site:8008/images/2/thumb
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka

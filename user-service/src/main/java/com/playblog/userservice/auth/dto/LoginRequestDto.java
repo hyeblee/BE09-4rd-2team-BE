@@ -1,14 +1,17 @@
 package com.playblog.userservice.auth.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @Builder
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginRequestDto {
-  private final String emailId;
-  private final String password;
-  private final String deviceId;
+  private String emailId;
+  private String password;
+  private String deviceId;
 }
