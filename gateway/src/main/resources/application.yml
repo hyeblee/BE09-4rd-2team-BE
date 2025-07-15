@@ -30,7 +30,7 @@ spring:
           filters:
             - RewritePath=/api/blog-service/(?<segment>.*), /$\{segment}
 
-      globalcors:  # ✅ 이 들여쓰기로 수정
+      globalcors:  # 이 들여쓰기로 수정
         corsConfigurations:
           '[/**]':
             allowedOrigins: "http://localhost:3000"
