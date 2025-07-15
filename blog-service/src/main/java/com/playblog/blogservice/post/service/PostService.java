@@ -10,10 +10,11 @@ import com.playblog.blogservice.post.entity.PostVisibility;
 import com.playblog.blogservice.post.repository.PostPolicyRepository;
 import com.playblog.blogservice.post.repository.PostRepository;
 import com.playblog.blogservice.postlike.repository.PostLikeRepository;
-import com.playblog.blogservice.user.UserRepository;
 import com.playblog.blogservice.user.User;
+import com.playblog.blogservice.user.UserRepository;
 import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -29,50 +30,111 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostPolicyRepository postPolicyRepository;
-    private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
+    private final UserRepository userRepository;
     // FtpProperties 주입
     private final FtpProperties ftpProperties;
+    private final FtpUploader ftpUploader;
+
 
     @Transactional
-    public PostResponseDto publishPost(PostRequestDto requestDto, MultipartFile thumbnailFile) throws IOException {
-
+    public PostResponseDto publishPost(PostRequestDto requestDto, MultipartFile thumbnailFile) {
+        // 1. 사용자 조회
         User user = userRepository.findById(requestDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        /// 2. 썸네일 파일 처리 (있을 경우)
+        if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
+            try {
+                String savedFileName = ftpUploader.uploadFile(
+                        ftpProperties.getServer(),
+                        ftpProperties.getPort(),
+                        ftpProperties.getUser(),
+                        ftpProperties.getPass(),
+                        "/images/2/thumb",
+                        thumbnailFile
+                );
+
+                String thumbnailUrl = "https://cdn.example.com/images/" + savedFileName;
+                requestDto.setThumbnailImageUrl(thumbnailUrl);
+
+            } catch (IOException e) {
+                throw new RuntimeException("썸네일 이미지 업로드 실패", e);
+            }
+        }
+
+        // 3. Post 저장
         Post post = postRepository.save(requestDto.toEntity(user));
 
-
-        // 1. FTP 업로드
-        String savedFileName = FtpUploader.uploadFile(
-                "dev.macacolabs.site",
-                21,
-                "team2",
-                "1234qwer",
-                "/images/2/thumb",
-                thumbnailFile
-        );
-
-        // 2. URL 생성
-        String thumbnailUrl = "https://cdn.example.com/images/" + savedFileName;
-
-        // 3. DTO에 URL 세팅 + 카테고리 고정
-        requestDto.setThumbnailImageUrl(thumbnailUrl);
-        requestDto.setCategory("게시글");
-
-        // 4. Post 저장
-        Post post1 = postRepository.save(requestDto.toEntity(user));
-
-        // 5. PostPolicy 저장
-        PostPolicy policy = requestDto.toPolicyEntity(post1);
+        // 4. PostPolicy 저장
+        PostPolicy policy = requestDto.toPolicyEntity(post);
         postPolicyRepository.save(policy);
 
-        // 6. 작성자 정보 + 상세 응답 형태로 가공
-        UserInfo userInfo = post.getUser().getUserInfo();
-        if (userInfo == null) {
-            throw new IllegalStateException("UserInfo가 연결되지 않았습니다. User ID: " + post.getUser().getId());
+        // 5. UserInfo 조회 및 응답 생성
+        UserInfo userInfo = user.getUserInfo();
+        return PostResponseDto.from(post, policy, userInfo, 0L, null);
+    }
+
+
+    @Transactional
+    public PostResponseDto updatePost(Long postId, PostRequestDto requestDto, MultipartFile thumbnailFile) throws IOException {
+
+        // 1. 게시글 조회 (존재하지 않으면 예외 발생)
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+
+        // 2. 작성자 검증 (다른 유저의 글을 수정하려 할 경우 예외 발생)
+        if (!Objects.equals(post.getUser().getId(), requestDto.getUserId())) {
+            throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
         }
-        Long likeCount = 0L; // 최초 0
-        Boolean isLiked = null;
+        // 🌤️ 토큰 비교 🌤️
+        // 🌤SecurityContextHolder에서 꺼낸 currentUserId를 requestDto.getUserId()와 비교
+        /*
+        if (!Objects.equals(post.getUser().getId(), currentUserId)) {
+            throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
+        }*/
+
+
+        // 3. 썸네일 파일 처리 (있을 경우만 FTP 업로드)
+        if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
+            String savedFileName = ftpUploader.uploadFile(
+                    ftpProperties.getServer(),
+                    ftpProperties.getPort(),
+                    ftpProperties.getUser(),
+                    ftpProperties.getPass(),
+                    "/images/2/thumb",
+                    thumbnailFile
+            );
+            String thumbnailUrl = "https://cdn.example.com/images/" + savedFileName;
+            requestDto.setThumbnailImageUrl(thumbnailUrl); // DTO에 URL 저장
+        }
+
+        // 4. 게시글 업데이트 (JPA Dirty Checking 활용)
+        post.update(
+                requestDto.getTitle(),
+                requestDto.getContent(),
+                requestDto.getVisibility(),
+                requestDto.getAllowComment(),
+                requestDto.getAllowLike(),
+                requestDto.getAllowSearch(),
+                requestDto.getThumbnailImageUrl(),
+                requestDto.getMainTopic(),
+                requestDto.getSubTopic()
+        );
+
+        // 5. 정책 업데이트 (정책이 없을 경우 예외 발생)
+        PostPolicy policy = postPolicyRepository.findByPostId(postId)
+                .orElseThrow(() -> new EntityNotFoundException("정책이 존재하지 않습니다."));
+        policy.update(
+                requestDto.getAllowComment(),
+                requestDto.getAllowLike(),
+                requestDto.getAllowSearch()
+        );
+
+        // 6. 응답 생성 (작성자 정보 + 공감 수 포함)
+        UserInfo userInfo = post.getUser().getUserInfo();
+        Long likeCount = postLikeRepository.countByPost_Id(postId);
+        Boolean isLiked = null; // 로그인 유저가 공감했는지 여부는 외부에서 처리 필요
 
         return PostResponseDto.from(post, policy, userInfo, likeCount, isLiked);
     }
@@ -130,20 +192,28 @@ public class PostService {
 //    }
 
     @Transactional
-    public void deletePost(Long postId) {
+    public String deletePost(Long postId, Long userId) {
 
-        // 1) PostPolicy 엔티티 조회 ( 우선 삭제 )
-        PostPolicy policy = postPolicyRepository.findById(postId)
-                .orElse(null);
-        if (policy != null) {
-            postPolicyRepository.delete(policy);
+        // 1. Post 조회
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+
+        // 2. 작성자 검증
+        if (!Objects.equals(post.getUser().getId(), userId)) {
+            throw new AccessDeniedException("작성자만 삭제할 수 있습니다.");
         }
 
-        // 2) Post 엔티티 삭제   ( 부모 엔터티 삭제 )
+        // 3. PostPolicy 먼저 삭제 (단방향 관계에서는 이 방법이 안전함)
+        postPolicyRepository.deleteByPostId(postId);
+
+        // 4) Post 엔티티 삭제   ( 부모 엔터티 삭제 )
         if (!postRepository.existsById(postId)) {
             throw new EntityNotFoundException("삭제할 게시글이 없습니다. id=" + postId);
         }
-        postRepository.deleteById(postId);
+        postRepository.delete(post);
+
+        // 5. 결과 메시지 반환
+        return "게시글이 성공적으로 삭제되었습니다.";
     }
 
     /**
@@ -195,8 +265,9 @@ public class PostService {
         }
 
         // 3. 추가 데이터 조회
-        PostPolicy policy = postPolicyRepository.findByPostId(post.getId())
-                .orElseThrow(() -> new EntityNotFoundException("정책 정보가 없습니다."));
+        PostPolicy policy = postPolicyRepository.findByPostId(postId)
+                .orElse(PostPolicy.defaultPublicPolicy(post)); // ← 여기 핵심
+        // PostVisibility visibility = post.getVisibility();
 
         UserInfo userInfo = post.getUser().getUserInfo();
         if (userInfo == null) {
@@ -209,6 +280,7 @@ public class PostService {
         // 4. DTO 변환 및 반환
         return PostResponseDto.from(post, policy, userInfo, likeCount, isLiked);
     }
+
 
 //    public static PostResponseDto fromEntity(Post post, PostPolicy policy, UserInfo userInfo) {
 //        return PostResponseDto.builder()

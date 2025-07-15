@@ -2,7 +2,10 @@ package com.playblog.blogservice.post.entity;
 
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
+import com.playblog.blogservice.post.dto.PostRequestDto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -95,4 +98,15 @@ public class Post {
         // this.tags = tags;
     }
 
+    public void update(@NotBlank String title, @NotBlank String content, @NotNull PostVisibility visibility, Boolean allowComment, Boolean allowLike, Boolean allowSearch, String thumbnailImageUrl, @NotNull TopicType mainTopic, @NotNull SubTopic subTopic) {
+    }
+
+    public void update(PostRequestDto dto) {
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+        this.thumbnailImageUrl = dto.getThumbnailImageUrl();
+        this.mainTopic = dto.getMainTopic();
+        this.subTopic = dto.getSubTopic();
+//        this.updatedAt = LocalDateTime.now(); 작성일시로 기본 고정
+    }
 }

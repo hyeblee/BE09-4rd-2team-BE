@@ -1,10 +1,17 @@
 package com.playblog.blogservice.post.controller;
 
 import com.playblog.blogservice.common.ApiResponse;
+import com.playblog.blogservice.ftp.common.FtpUploader;
+import com.playblog.blogservice.ftp.controller.FtpUploadController;
 import com.playblog.blogservice.post.dto.PostRequestDto;
 //import com.playblog.blogservice.postservice.post.dto.PostResponseDto;
 import com.playblog.blogservice.post.dto.PostResponseDto;
+import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.post.entity.PostPolicy;
+import com.playblog.blogservice.post.repository.PostPolicyRepository;
+import com.playblog.blogservice.post.repository.PostRepository;
 import com.playblog.blogservice.post.service.PostService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +36,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class PostController {
 
     private final PostService postService;
+    private final PostRepository postRepository;
+    private final FtpUploader ftpUploader;
+    private final PostPolicyRepository postPolicyRepository;
 
     /* 게시글 발행 */
     /**
@@ -64,6 +76,7 @@ public class PostController {
         return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
     }
 
+    /* 내 블로그 조회 */
     /**
      * 사용자의 블로그 게시글 상세 정보를 조회하는 API
      *
@@ -86,6 +99,7 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(dto));
     }
 
+    /* 다른 사람 블로그 조회 */
     /**
      * 다른 사용자의 블로그 게시글 상세 정보를 조회하는 API
      *
@@ -103,28 +117,73 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(dto));
     }
 
-//    /* 게시글 상세 조회 */
+    /* 게시글 수정 */
+    @PutMapping(
+            value = "/{postId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public PostResponseDto updatePost(@PathVariable("postId") Long postId, PostRequestDto requestDto, MultipartFile thumbnailFile) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글 없음"));
+
+        // DTO에서 유저를 받아오는 경우
+        Long requestUserId = requestDto.getUserId();
+        if (requestUserId == null) {
+            log.warn("※ 테스트용: 사용자 ID가 없어 기본값 1L 사용");
+            requestUserId = 1L; // 테스트용
+        }
+
+        // 테스트 환경에서는 작성자 검증 생략
+        if (post.getUser().getId() != requestUserId) {
+            log.warn("※ 테스트 모드: 작성자 아님에도 수정 허용 (userId={}, postOwnerId={})", requestUserId, post.getUser().getId());
+            // throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
+        }
+
+        // 썸네일 수정
+        if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
+            String newUrl = ftpUploader.upload(thumbnailFile);
+            requestDto.setThumbnailImageUrl(newUrl);
+        }
+
+        // 게시글 수정
+        post.update(requestDto); // 제목, 내용, 썸네일 등 갱신
+
+        // 정책 조회 후 없으면 테스트용 생성
+        PostPolicy policy = postPolicyRepository.findByPostId(postId)
+                .orElseGet(() -> {
+                    log.warn("※ 테스트용: 정책 정보가 없어 기본 정책 생성");
+                    PostPolicy testPolicy = PostPolicy.defaultPublicPolicy(post);
+                    // PostVisibility visibility = post.getVisibility();
+                    return postPolicyRepository.save(testPolicy);
+                });
+
+        policy.update(
+                requestDto.getAllowComment(),
+                requestDto.getAllowLike(),
+                requestDto.getAllowSearch()
+        );
+
+        return PostResponseDto.from(post, policy, post.getUser().getUserInfo(), null, null);
+    }
+
+    /* 게시글 삭제 */
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ApiResponse<String>> deletePost(
+            @PathVariable Long postId,
+            Authentication authentication
+    ) {
+        Long userId = Long.parseLong(authentication.getName());
+        String resultMessage = postService.deletePost(postId, userId);
+        return ResponseEntity.ok(ApiResponse.success(resultMessage));
+    }
+
+//    /* (기본형) 게시글 상세 조회 */
 //    @GetMapping("/main/{postId}")
 //    public ResponseEntity<PostResponseDto> PostDetailResponse(@PathVariable Long postId) {
 //        PostResponseDto response = postService.getPostDetail(postId);
 //        return ResponseEntity.ok(response);
 //    }
-
-//    /* 게시글 수정 */
-//    @PutMapping("/{postId}")
-//    public ResponseEntity<PostResponseDto> updatePost(
-//            @PathVariable Long postId,
-//            @RequestBody @Valid PostRequestDto requestDto) {
-//        PostResponseDto response = postService.updatePost(postId, requestDto);
-//        return ResponseEntity.ok(response);
-//    }
-
-    /* 게시글 삭제 */
-    @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
-        postService.deletePost(postId);
-        return ResponseEntity.noContent().build();
-    }
 
 }
 

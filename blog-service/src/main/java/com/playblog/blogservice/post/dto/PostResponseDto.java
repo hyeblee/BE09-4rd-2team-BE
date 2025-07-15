@@ -5,6 +5,7 @@ import com.playblog.blogservice.common.entity.TopicType;
 import com.playblog.blogservice.post.entity.Post;
 import com.playblog.blogservice.post.entity.PostPolicy;
 import com.playblog.blogservice.post.entity.PostVisibility;
+import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
 import lombok.*;
 
@@ -94,6 +95,22 @@ public class PostResponseDto {
 
                 .build();
 
-
     }
+
+    /* 정책포함 상세조회용 Dto 빌더 */
+    public PostResponseDto toResponse(Post post, PostPolicy policy, User user) {
+        return PostResponseDto.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .visibility(policy.getPost().getVisibility()) // ← 여기 추가
+                .allowComment(policy.getAllowComment())
+                .allowLike(policy.getAllowLike())
+                .allowSearch(policy.getAllowSearch())
+                .blogTitle(user.getUserInfo().getBlogTitle())
+                .nickname(user.getUserInfo().getNickname())
+                .profileImageUrl(user.getUserInfo().getProfileImageUrl())
+                .build();
+    }
+
 }
