@@ -1,6 +1,5 @@
 package com.playblog.blogservice.userInfo.dto;
 
-import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
 import lombok.Getter;
 
@@ -11,7 +10,7 @@ public class UserInfoResponse {
   private String nickname;
   private String blogId;
   private String profileIntro;
-  private String profileImgeUrl;
+  private String profileImgUrl;
 
   public UserInfoResponse(UserInfo userInfo) {
     this.userId = userInfo.getUser().getId();
@@ -19,7 +18,7 @@ public class UserInfoResponse {
     this.nickname = userInfo.getNickname();
     this.blogId = userInfo.getBlogId();
     this.profileIntro = userInfo.getProfileIntro();
-    this.profileImgeUrl = userInfo.getProfileImageUrl();
+    this.profileImgUrl = userInfo.getProfileImageUrl();
   }
 
 
