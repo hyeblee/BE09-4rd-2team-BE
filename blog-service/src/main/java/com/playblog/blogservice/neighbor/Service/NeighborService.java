@@ -6,16 +6,14 @@ package com.playblog.blogservice.neighbor.Service;
 import com.playblog.blogservice.neighbor.Entity.Neighbor;
 import com.playblog.blogservice.neighbor.Entity.NeighborStatus;
 import com.playblog.blogservice.neighbor.Repository.NeighborRepository;
-import com.playblog.blogservice.neighbor.dto.NeighborDto;
+
 import com.playblog.blogservice.userInfo.UserInfo;
 import com.playblog.blogservice.userInfo.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -272,7 +270,7 @@ public class NeighborService {
     @Transactional
     public void acceptNeighbor(Long fromUserId, Long toUserId) {
         if (fromUserId.equals(toUserId)) {
-            throw new IllegalArgumentException("자기 자신에게 이웃 요청을 보낼 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "자기 자신에게 이웃 요청을 보낼 수 없습니다.");
         }
 
         UserInfo fromUser = userInfoRepository.findById(fromUserId)
@@ -332,15 +330,32 @@ public class NeighborService {
     @Transactional
     public void blockNeighbors(Long userId, List<Long> blockUserIds) {
         UserInfo me = userInfoRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        for(Long id : blockUserIds) {
-            UserInfo other = userInfoRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-            Optional<Neighbor> relation  = neighborRepository.findByFromUserInfoAndToUserInfo(other,me);
-            if(relation.isPresent()) {
-                relation.get().setStatus(REMOVED);
+        for (Long targetId : blockUserIds) {
+
+            // 나 자신은 건너뜀 (옵션)
+            if (userId.equals(targetId)) continue;
+
+            UserInfo other = userInfoRepository.findById(targetId)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + targetId));
+
+            // ③ 기존 관계 조회 (from = me, to = other)
+            Optional<Neighbor> opt = neighborRepository.findByFromUserInfoAndToUserInfo(me, other);
+
+            if (opt.isPresent()) {
+                // ④ 이미 관계가 있으면 상태만 REMOVED 로 변경
+                Neighbor relation = opt.get();
+                relation.setStatus(NeighborStatus.REMOVED);
+            } else {
+                // ⑤ 없으면 새로운 관계를 만들어 REMOVED 로 저장
+                Neighbor relation = Neighbor.builder()
+                        .fromUserInfo(me)
+                        .toUserInfo(other)
+                        .status(NeighborStatus.REMOVED)
+                        .build();
+                neighborRepository.save(relation);
             }
         }
     }
-
     public List<Neighbor> getBlockedNeighbors(Long userId) {
         UserInfo me = userInfoRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 

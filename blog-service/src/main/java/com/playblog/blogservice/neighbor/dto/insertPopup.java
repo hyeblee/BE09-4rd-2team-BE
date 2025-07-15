@@ -5,11 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
-public class BlockedForMeNeighborDto {
-    private Long id;
+public class insertPopup {
+    private Long Id;
     private String nickname;
-    private String blogId;
 }

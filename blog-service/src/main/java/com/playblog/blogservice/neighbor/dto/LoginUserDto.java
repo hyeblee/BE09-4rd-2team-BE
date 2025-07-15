@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
-@Getter
 @NoArgsConstructor
-public class BlockedForMeNeighborDto {
-    private Long id;
+@Getter
+public class LoginUserDto {
+    private Long userId;
     private String nickname;
-    private String blogId;
+    private String profileImageUrl;
 }

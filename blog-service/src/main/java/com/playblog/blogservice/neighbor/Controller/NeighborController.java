@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class NeighborController {
     private final NeighborService neighborService;
     private final NeighborDtoMapper neighborDtoMapper;
+    private final UserInfoRepository userInfoRepository;
 
 
     // 내가 요청한 이웃(내가 추가)
@@ -75,7 +76,6 @@ public class NeighborController {
     ) {
         if (userIdStr == null) throw new RuntimeException("로그인 필요");
         Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
-
         List<Neighbor> neighbors = neighborService.getSentMutualNeighbors(userId);
         List<SentMutualNeighborDto> result = neighbors.stream()
                 .map(neighborDtoMapper::toSentMutualDto)
@@ -118,6 +118,9 @@ public class NeighborController {
             @AuthenticationPrincipal String userIdStr,
             @PathVariable Long insertUserId
     ){
+        System.out.println("🧪 @AuthenticationPrincipal userIdStr = " + userIdStr);
+        System.out.println("🧪 @PathVariable insertUserId = " + insertUserId);
+
         if (userIdStr == null) throw new RuntimeException("로그인 필요");
         Long userId = Long.valueOf(userIdStr);  // 👈 여기서 안전하게 변환
 
@@ -202,7 +205,7 @@ public class NeighborController {
 
     // 차단 유저 조회
     @GetMapping("/blocked")
-    public ResponseEntity<Void> blockedNeighbors(
+    public ResponseEntity<List<BlockedForMeNeighborDto>> blockedNeighbors(
             @AuthenticationPrincipal String userIdStr
     ){
         if (userIdStr == null) throw new RuntimeException("로그인 필요");
@@ -211,6 +214,38 @@ public class NeighborController {
         List<BlockedForMeNeighborDto> result = blockedNeighbors.stream()
                 .map(neighborDtoMapper::blockedForMeNeighborDto)
                 .toList();
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(result);
     }
+    // 로그인 정보
+    @GetMapping("/saved")
+    public ResponseEntity<LoginUserDto> savedNeighbors(@AuthenticationPrincipal String userIdStr) {
+        System.out.println("[🔍 Principal userIdStr] " + userIdStr);
+
+        if (userIdStr == null) throw new RuntimeException("로그인 필요");
+        Long userId = Long.valueOf(userIdStr);
+
+        System.out.println("[✅ Parsed userId] " + userId);
+        UserInfo loginUser = userInfoRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        System.out.println("[🎯 loginUser] " + loginUser.getNickname());
+
+        LoginUserDto userInfo = neighborDtoMapper.toLoginUserDto(loginUser);
+
+        return ResponseEntity.ok(userInfo);
+    }
+
+    // 해당 유저정보 넘겨주기
+    @GetMapping("/by-nickname/{nickname}")
+    public ResponseEntity<insertPopup> getUserByNickname(
+            @PathVariable String nickname) {
+        System.out.println("📌 요청 받은 닉네임: [" + nickname + "]");
+        UserInfo user = userInfoRepository.findByNickname(nickname);
+        System.out.println(user.toString());
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(neighborDtoMapper.toInsertPopup(user));
+    }
+
 }

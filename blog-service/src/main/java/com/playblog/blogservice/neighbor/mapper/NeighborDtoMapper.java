@@ -93,7 +93,22 @@ public class NeighborDtoMapper {
         UserInfo toUser = neighbor.getToUserInfo();
         return new BlockedForMeNeighborDto(
                 toUser.getId(),
-                toUser.getNickname()
+                toUser.getNickname(),
+                toUser.getBlogId()
+        );
+    }
+    public LoginUserDto toLoginUserDto(UserInfo loginUser) {
+        return new LoginUserDto(
+                loginUser.getId(),
+                loginUser.getNickname(),
+                loginUser.getProfileIntro()
+        );
+    }
+
+    public insertPopup toInsertPopup(UserInfo addUser) {
+        return new insertPopup(
+                addUser.getId(),
+                addUser.getNickname()
         );
     }
 }
