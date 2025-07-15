@@ -28,7 +28,7 @@ public class UserInfoController {
 
 
   // 수정
-  @PutMapping("/{userId}")
+  @PatchMapping("/{userId}")
   public UserInfoResponse updateUserInfo(@PathVariable Long userId,
       @RequestBody UserInfoRequest request) {
     return userInfoService.updateUserInfo(userId, request);
