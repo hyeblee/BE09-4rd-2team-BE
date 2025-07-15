@@ -1,5 +1,6 @@
 package com.playblog.blogservice.post.controller;
 
+import com.playblog.blogservice.common.ApiResponse;
 import com.playblog.blogservice.post.dto.PostRequestDto;
 //import com.playblog.blogservice.postservice.post.dto.PostResponseDto;
 import com.playblog.blogservice.post.dto.PostResponseDto;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +28,6 @@ public class PostController {
 
     private final PostService postService;
 
-
     /* 게시글 발행 */
     /**
      * 게시글 발행 API
@@ -35,7 +36,7 @@ public class PostController {
      * @return 생성된 게시글의 응답 DTO와 Location 헤더
      */
     // 스프링이 기본 컨버터를 통해 multipart/form-data 처리도 자동으로 지원
-    @PostMapping/*(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)*/
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostResponseDto> publishPost(
             @Valid @RequestPart("requestDto") PostRequestDto requestDto,
             @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile
@@ -63,12 +64,51 @@ public class PostController {
         return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
     }
 
-    /* 게시글 상세 조회 */
-    @GetMapping("/main/{postId}")
-    public ResponseEntity<PostResponseDto> PostDetailResponse(@PathVariable Long postId) {
-        PostResponseDto response = postService.getPostDetail(postId);
-        return ResponseEntity.ok(response);
+    /**
+     * 사용자의 블로그 게시글 상세 정보를 조회하는 API
+     *
+     * @param authentication 인증 객체로부터 사용자 ID를 추출
+     * @param postId 조회할 게시글의 ID
+     * @return 게시글 정보를 담은 응답 객체
+     */
+    @GetMapping("/myblog/{postId}")
+    public ResponseEntity<ApiResponse<PostResponseDto>> getMyPostDetail(
+            Authentication authentication,
+            @PathVariable Long postId
+    ) {
+        // 1. 인증된 사용자 ID 추출
+        Long userId = Long.parseLong(authentication.getName());
+
+        // 2. 게시글 ID와 사용자 ID로 상세 정보 조회
+        PostResponseDto dto = postService.getMyPostDetail(postId, userId);
+
+        // 3. 응답 반환
+        return ResponseEntity.ok(ApiResponse.success(dto));
     }
+
+    /**
+     * 다른 사용자의 블로그 게시글 상세 정보를 조회하는 API
+     *
+     * @param postId 조회할 게시글의 ID
+     * @return 게시글 정보를 담은 응답 객체
+     */
+    @GetMapping("/otherblog/{postId}")
+    public ResponseEntity<ApiResponse<PostResponseDto>> getOtherPostDetail(
+            @PathVariable Long postId
+    ) {
+        // 주어진 게시글 ID를 기반으로 다른 사용자의 게시글 상세 정보를 조회
+        PostResponseDto dto = postService.getOtherPostDetail(postId);
+
+        // 성공 응답과 함께 게시글 정보를 반환
+        return ResponseEntity.ok(ApiResponse.success(dto));
+    }
+
+//    /* 게시글 상세 조회 */
+//    @GetMapping("/main/{postId}")
+//    public ResponseEntity<PostResponseDto> PostDetailResponse(@PathVariable Long postId) {
+//        PostResponseDto response = postService.getPostDetail(postId);
+//        return ResponseEntity.ok(response);
+//    }
 
 //    /* 게시글 수정 */
 //    @PutMapping("/{postId}")

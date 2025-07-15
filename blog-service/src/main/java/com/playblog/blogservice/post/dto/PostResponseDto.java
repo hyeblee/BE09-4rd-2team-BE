@@ -93,27 +93,7 @@ public class PostResponseDto {
                 .thumbnailImageUrl(post.getThumbnailImageUrl())
 
                 .build();
+
+
     }
-
-
-
-//    Null값 포스트
-//    public static PostResponseDto from(Post post, UserInfo userInfo, /* List<CommentResponse> comments, */ Long likeCount, Boolean isLiked) {
-//        return PostResponseDto.builder()
-//                .postId(post.getId())
-//                .title(post.getTitle())
-//                .content(post.getContent())
-//                .visibility(post.getVisibility())
-//                .allowComment(post.getPostPolicy() != null ? post.getPostPolicy().getAllowComment() : null)
-//                .allowLike(post.getPostPolicy() != null ? post.getPostPolicy().getAllowLike() : null)
-//                .allowSearch(post.getPostPolicy() != null ? post.getPostPolicy().getAllowSearch() : null)
-//                .blogTitle(userInfo.getBlogTitle())
-//                .nickname(userInfo.getNickname())
-//                .profileImageUrl(userInfo.getProfileImageUrl())
-//                .likeCount(likeCount)
-//                .isLiked(isLiked)
-////                .comments(comments)
-//                .build();
-//    }
-
 }

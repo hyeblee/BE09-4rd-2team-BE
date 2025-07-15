@@ -11,9 +11,11 @@ import lombok.*;
 @Builder
 public class PostPolicy {
     @Id
-    private Long id; // Post의 PK와 같음
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 이게 실질적인 문제였음
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "post_id")
     private Post post;
 
     private Boolean allowComment; // 댓글 허용

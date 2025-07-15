@@ -1,6 +1,5 @@
 package com.playblog.blogservice.user;
 
-
 import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.*;
 import lombok.*;

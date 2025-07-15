@@ -2,7 +2,6 @@ package com.playblog.blogservice.userInfo;
 
 import com.playblog.blogservice.userInfo.dto.UserInfoRequest;
 import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
-import java.net.http.HttpResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

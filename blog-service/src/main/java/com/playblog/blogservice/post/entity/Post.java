@@ -16,14 +16,6 @@ import com.playblog.blogservice.user.User;
 @AllArgsConstructor
 @Builder
 public class Post {
-    /* 정책 참조 */
-  /*  @Column(nullable = false)
-    private Boolean allowComment;
-    @Column(nullable = false)
-    private Boolean allowLike;
-    @Column(nullable = false)
-    private Boolean allowSearch;*/
-
     /* 유저 참조 */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -103,34 +95,4 @@ public class Post {
         // this.tags = tags;
     }
 
-    @Getter @Setter
-    public class PostUpdateDto {
-        private String title;
-        private String content;
-        private PostVisibility visibility;
-        private Boolean allowComment;
-        private Boolean allowLike;
-        private Boolean allowSearch;
-        private String thumbnailImageUrl;
-        private TopicType mainTopic;
-        private SubTopic subTopic;
-    }
-
-
-    // JPA의 영속성 컨텍스트와 변경 감지(dirty checking) 기능
-    public void update(
-            String title,
-            String content,
-            PostVisibility visibility,
-            String thumbnailImageUrl,
-            TopicType mainTopic,
-            SubTopic subTopic
-    ) {
-        this.title             = title;
-        this.content           = content;
-        this.visibility        = visibility;
-        this.thumbnailImageUrl = thumbnailImageUrl;
-        this.mainTopic         = mainTopic;
-        this.subTopic          = subTopic;
-    }
 }
