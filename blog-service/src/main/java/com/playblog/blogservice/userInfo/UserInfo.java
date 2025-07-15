@@ -25,17 +25,10 @@ public class UserInfo {
   @OnDelete(action = OnDeleteAction.CASCADE)  // 외래키 관계 필드에만 적용
   private User user;
 
-  String blogTitle;
-  String nickname;
-  String blogId;
+  String blogTitle; // 블로그명
+  String nickname; // 별명
+  String blogId; // 블로그 아이디 (= 로그인 이메일 아이디)
   String profileIntro; // 프로필 소개글
   String profileImageUrl; // 프로필 이미지 URL
-
-  // Neighbor은 단방향 참조 예정..
- @OneToMany(mappedBy = "fromUserInfo")
-  private List<Neighbor> followingList;
-
-  @OneToMany(mappedBy = "toUserInfo")
-  private List<Neighbor> followerList;
 
 }
