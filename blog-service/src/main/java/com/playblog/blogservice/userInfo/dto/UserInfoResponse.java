@@ -10,7 +10,7 @@ public class UserInfoResponse {
   private String nickname;
   private String blogId;
   private String profileIntro;
-  private String profileImgurl;
+  private String profileImgUrl;
 
   public UserInfoResponse(UserInfo userInfo) {
     this.userId = userInfo.getUser().getId();
@@ -18,7 +18,7 @@ public class UserInfoResponse {
     this.nickname = userInfo.getNickname();
     this.blogId = userInfo.getBlogId();
     this.profileIntro = userInfo.getProfileIntro();
-    this.profileImgurl = userInfo.getProfileImageUrl();
+    this.profileImgUrl = userInfo.getProfileImageUrl();
   }
 
 
