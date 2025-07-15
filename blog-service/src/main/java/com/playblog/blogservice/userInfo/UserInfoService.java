@@ -45,11 +45,10 @@ public class UserInfoService {
     UserInfo userInfo = userInfoRepository.findById(userId)
         .orElseThrow(() -> new IllegalArgumentException("해당 유저 없음: id=" + userId));
 
-    userInfo.setNickname(dto.getNickname());
     userInfo.setBlogTitle(dto.getBlogTitle());
-    userInfo.setBlogId(dto.getBlogId());
+    userInfo.setNickname(dto.getNickname());
     userInfo.setProfileIntro(dto.getProfileIntro());
-    userInfo.setProfileImageUrl("");
+    userInfo.setProfileImageUrl(dto.getProfileImgUrl());
 
     return new UserInfoResponse(userInfo);
   }
