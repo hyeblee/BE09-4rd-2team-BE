@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class UserInfoResponse {
-  private User user;
+  private Long userId;
   private String blogTitle;
   private String nickname;
   private String blogId;
@@ -14,7 +14,7 @@ public class UserInfoResponse {
   private String profileImgeUrl;
 
   public UserInfoResponse(UserInfo userInfo) {
-    this.user = userInfo.getUser();
+    this.userId = userInfo.getUser().getId();
     this.blogTitle = userInfo.getBlogTitle();
     this.nickname = userInfo.getNickname();
     this.blogId = userInfo.getBlogId();
