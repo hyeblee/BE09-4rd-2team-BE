@@ -22,7 +22,7 @@ public class UserService {
 
 
   @Transactional
-  public void registerUser(UserRegisterRequestDto requestDto) {
+  public Long registerUser(UserRegisterRequestDto requestDto) {
     System.out.println(requestDto);
     if (isEmailDuplicate(requestDto.getEmailId())) {
       throw new DuplicateEmailException();
@@ -33,5 +33,6 @@ public class UserService {
 
     user.setPassword(encodedPassword);  // 암호화된 비밀번호 세팅
     userRepository.save(user);
+    return user.getId();
   }
 }

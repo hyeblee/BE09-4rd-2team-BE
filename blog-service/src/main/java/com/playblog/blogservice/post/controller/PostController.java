@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-@RequestMapping(path = "/api/posts")
+@RequestMapping(path = "/posts")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
