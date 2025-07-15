@@ -21,4 +21,6 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
 
     //     User 정보로 UserInfo 조회
     Optional<UserInfo> findByUser(User user);
+
+    UserInfo findByNickname(String nickname);
 }
