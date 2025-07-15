@@ -103,14 +103,26 @@ public class Post {
         // this.tags = tags;
     }
 
+    @Getter @Setter
+    public class PostUpdateDto {
+        private String title;
+        private String content;
+        private PostVisibility visibility;
+        private Boolean allowComment;
+        private Boolean allowLike;
+        private Boolean allowSearch;
+        private String thumbnailImageUrl;
+        private TopicType mainTopic;
+        private SubTopic subTopic;
+    }
+
+
     // JPA의 영속성 컨텍스트와 변경 감지(dirty checking) 기능
     public void update(
             String title,
             String content,
             PostVisibility visibility,
-            Boolean allowComment,
-            Boolean allowLike,
-            Boolean allowSearch,
+
             String thumbnailImageUrl,
             TopicType mainTopic,
             SubTopic subTopic
@@ -118,9 +130,6 @@ public class Post {
         this.title             = title;
         this.content           = content;
         this.visibility        = visibility;
-        this.allowComment      = allowComment;
-        this.allowLike         = allowLike;
-        this.allowSearch       = allowSearch;
         this.thumbnailImageUrl = thumbnailImageUrl;
         this.mainTopic         = mainTopic;
         this.subTopic          = subTopic;

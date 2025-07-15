@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,17 +25,15 @@ public class PostController {
 
     private final PostService postService;
 
-    /* 게시글 발행 */
     /**
      * 게시글 발행 API
      * @param requestDto JSON 형태의 게시글 데이터
      * @param thumbnailFile 선택적 썸네일 이미지 파일
      * @return 생성된 게시글의 응답 DTO와 Location 헤더
      */
-//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 // 스프링이 기본 컨버터를 통해 multipart/form-data 처리도 자동으로 지원
-    @PostMapping
-    public ResponseEntity<PostResponseDto> publishPost(
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+        public ResponseEntity<PostResponseDto> publishPost(
             @Valid @RequestPart("requestDto") PostRequestDto requestDto,
             @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile
             // 썸네일 파일은 multipart 요청의 또 다른 부분이며, 선택 사항입니다.
@@ -60,6 +59,7 @@ public class PostController {
         log.info("[POST] /api/posts - created post id={} at {}", response.getPostId(), location);
         return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
     }
+    /* 게시글 발행 */
 
     /* 게시글 상세 조회 */
     @GetMapping("/main/{postId}")
@@ -68,14 +68,14 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-    /* 게시글 수정 */
-    @PutMapping("/{postId}")
-    public ResponseEntity<PostResponseDto> updatePost(
-            @PathVariable Long postId,
-            @RequestBody @Valid PostRequestDto requestDto) {
-        PostResponseDto response = postService.updatePost(postId, requestDto);
-        return ResponseEntity.ok(response);
-    }
+//    /* 게시글 수정 */
+//    @PutMapping("/{postId}")
+//    public ResponseEntity<PostResponseDto> updatePost(
+//            @PathVariable Long postId,
+//            @RequestBody @Valid PostRequestDto requestDto) {
+//        PostResponseDto response = postService.updatePost(postId, requestDto);
+//        return ResponseEntity.ok(response);
+//    }
 
     /* 게시글 삭제 */
     @DeleteMapping("/{postId}")

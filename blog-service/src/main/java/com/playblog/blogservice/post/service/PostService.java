@@ -8,11 +8,11 @@ import com.playblog.blogservice.post.entity.Post;
 import com.playblog.blogservice.post.entity.PostPolicy;
 import com.playblog.blogservice.post.repository.PostPolicyRepository;
 import com.playblog.blogservice.post.repository.PostRepository;
+import com.playblog.blogservice.postlike.repository.PostLikeRepository;
 import com.playblog.blogservice.user.UserRepository;
 import com.playblog.blogservice.user.User;
 import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +30,6 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     // FtpProperties 주입
     private final FtpProperties ftpProperties;
-
-
 
     @Transactional
     public PostResponseDto publishPost(PostRequestDto requestDto, MultipartFile thumbnailFile) throws IOException {
@@ -72,7 +70,7 @@ public class PostService {
         Long likeCount = 0L; // 최초 0
         Boolean isLiked = null;
 
-        return PostResponseDto.from(post, userInfo, policy, likeCount, isLiked);
+        return PostResponseDto.from(post, policy, userInfo, likeCount, isLiked);
     }
 
     @Transactional(readOnly = true)
@@ -87,33 +85,33 @@ public class PostService {
         PostPolicy policy = postPolicyRepository.findByPostId(post.getId())
                 .orElseThrow(() -> new EntityNotFoundException("정책 없음"));
 
-        Long likeCount = postLikeRepository.countByPostId(post.getId());;    // 공감 수
+        Long likeCount = postLikeRepository.countByPost_Id(post.getId());;    // 공감 수
         Boolean isLiked = null; // (현재) 로그인 사용자 없으면 판단 불가
 //        Boolean isLiked = likeRepository.existsByPostIdAndUserId((post.getId(), currentUserId);   // 사용자가 눌렀는지
 
-        return PostResponseDto.from(post, userInfo, policy, likeCount, isLiked);
+        return PostResponseDto.from(post, policy, userInfo, likeCount, isLiked);
     }
 
-    @Transactional
-    public PostResponseDto updatePost(Long postId, @Valid PostRequestDto dto) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다. id=" + postId));
-
-        // JPA의 영속성 컨텍스트와 변경 감지(dirty checking) 기능
-        post.update(
-                dto.getTitle(),
-                dto.getContent(),
-                dto.getVisibility(),
-                dto.getAllowComment(),
-                dto.getAllowLike(),
-                dto.getAllowSearch(),
-                dto.getThumbnailImageUrl(),
-                dto.getMainTopic(),    // enum 필드
-                dto.getSubTopic()      // enum 필드
-        );
-
-        return PostResponseDto.fromEntity(post);
-    }
+//    @Transactional
+//    public PostResponseDto updatePost(Long postId, @Valid PostRequestDto dto) {
+//        Post post = postRepository.findById(postId)
+//                .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다. id=" + postId));
+//
+//        // JPA의 영속성 컨텍스트와 변경 감지(dirty checking) 기능
+//        post.update(
+//                dto.getTitle(),
+//                dto.getContent(),
+//                dto.getVisibility(),
+//                dto.getAllowComment(),
+//                dto.getAllowLike(),
+//                dto.getAllowSearch(),
+//                dto.getThumbnailImageUrl(),
+//                dto.getMainTopic(),    // enum 필드
+//                dto.getSubTopic()      // enum 필드
+//        );
+//
+//        return PostResponseDto.from(post);
+//    }
 
     @Transactional
     public void deletePost(Long postId) {
