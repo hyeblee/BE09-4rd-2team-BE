@@ -3,6 +3,10 @@ server:
 #  port: ${SERVER_PORT:8081}   # env SERVER_PORT가 있으면 그 값을, 없으면 8081을 기본으로
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   config:
     import: application-secret.yml  # 비밀 설정 파일을 가져옴
   application:
@@ -33,7 +37,6 @@ ftp:
   port:         21
   user:         ${FTP_USER}
   pass:         ${FTP_PASS}
-
   # 원본 이미지 저장 디렉토리
   editor-dir:   /images/2/editor
   # 썸네일 저장 디렉토리

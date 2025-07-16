@@ -2,7 +2,6 @@ package com.playblog.blogservice.userInfo;
 
 import com.playblog.blogservice.userInfo.dto.UserInfoRequest;
 import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
-import java.net.http.HttpResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +27,7 @@ public class UserInfoController {
 
 
   // 수정
-  @PutMapping("/{userId}")
+  @PatchMapping("/{userId}")
   public UserInfoResponse updateUserInfo(@PathVariable Long userId,
       @RequestBody UserInfoRequest request) {
     return userInfoService.updateUserInfo(userId, request);

@@ -1,5 +1,7 @@
 package com.playblog.blogservice.userInfo;
 
+import com.playblog.blogservice.user.User;
+import com.playblog.blogservice.user.UserRepository;
 import com.playblog.blogservice.userInfo.dto.UserInfoRequest;
 import com.playblog.blogservice.userInfo.dto.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserInfoService {
 
   private final UserInfoRepository userInfoRepository;
+  private final UserRepository userRepository;
 
   @Transactional(readOnly = true)
   public UserInfoResponse getUserInfo(Long userId) {
@@ -26,11 +29,14 @@ public class UserInfoService {
       return new UserInfoResponse(userInfoRepository.findById(userId).get());
     }
     UserInfo info = new UserInfo();
-    info.setId(userId);
+    User user = userRepository.findById(userId).orElseThrow();
+    String emailId = user.getEmailId();
+    info.setUser(user);
+    info.setBlogTitle(emailId+"님의블로그");
     info.setNickname("");
-    info.setBlogTitle("");
-    info.setBlogId("");
+    info.setBlogId(emailId);
     info.setProfileIntro("");
+    info.setProfileImageUrl("");
     return new UserInfoResponse(userInfoRepository.save(info));
   }
 
@@ -39,10 +45,10 @@ public class UserInfoService {
     UserInfo userInfo = userInfoRepository.findById(userId)
         .orElseThrow(() -> new IllegalArgumentException("해당 유저 없음: id=" + userId));
 
-    userInfo.setNickname(dto.getNickname());
     userInfo.setBlogTitle(dto.getBlogTitle());
-    userInfo.setBlogId(dto.getBlogId());
+    userInfo.setNickname(dto.getNickname());
     userInfo.setProfileIntro(dto.getProfileIntro());
+    userInfo.setProfileImageUrl(dto.getProfileImgUrl());
 
     return new UserInfoResponse(userInfo);
   }

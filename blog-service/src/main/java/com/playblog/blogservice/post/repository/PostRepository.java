@@ -2,6 +2,7 @@ package com.playblog.blogservice.post.repository;
 
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.post.entity.Post;
+import com.playblog.blogservice.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUserIdInOrderByPublishedAtDesc(List<Long> userIds, Pageable pageable);
 
     Page<Post> findByUser_UserInfo_IdInOrderByPublishedAtDesc(List<Long> userInfoIds, Pageable pageable);
+
+    Long user(User user);
 }

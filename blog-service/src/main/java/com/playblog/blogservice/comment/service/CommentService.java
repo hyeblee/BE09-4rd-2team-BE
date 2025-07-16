@@ -39,9 +39,9 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
 
         // ✅ 추가: 댓글 허용 여부 확인
-        if (targetPost.getAllowComment() != null && !targetPost.getAllowComment()) {
-            throw new IllegalArgumentException("이 게시글은 댓글을 허용하지 않습니다.");
-        }
+//        if (targetPost.getAllowComment() != null && !targetPost.getAllowComment()) {
+//            throw new IllegalArgumentException("이 게시글은 댓글을 허용하지 않습니다.");
+//        }
 
         Comment savedComment = Comment.builder()
                 .post(targetPost)

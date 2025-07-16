@@ -10,4 +10,5 @@ public class UserInfoRequest {
   private String nickname;
   private String blogId;
   private String profileIntro;
+  private String profileImgUrl;
 }

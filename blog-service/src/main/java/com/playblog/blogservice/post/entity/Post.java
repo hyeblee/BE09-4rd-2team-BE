@@ -2,7 +2,10 @@ package com.playblog.blogservice.post.entity;
 
 import com.playblog.blogservice.common.entity.SubTopic;
 import com.playblog.blogservice.common.entity.TopicType;
+import com.playblog.blogservice.post.dto.PostRequestDto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -12,18 +15,12 @@ import com.playblog.blogservice.user.User;
 @Entity
 @Getter
 @Setter(AccessLevel.PACKAGE)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Post {
-    /* 정책 참조 */
-    @Column(nullable = false)
-    private Boolean allowComment;
-    @Column(nullable = false)
-    private Boolean allowLike;
-    @Column(nullable = false)
-    private Boolean allowSearch;
-
     /* 유저 참조 */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -101,26 +98,15 @@ public class Post {
         // this.tags = tags;
     }
 
-    // JPA의 영속성 컨텍스트와 변경 감지(dirty checking) 기능
-    public void update(
-            String title,
-            String content,
-            PostVisibility visibility,
-            Boolean allowComment,
-            Boolean allowLike,
-            Boolean allowSearch,
-            String thumbnailImageUrl,
-            TopicType mainTopic,
-            SubTopic subTopic
-    ) {
-        this.title             = title;
-        this.content           = content;
-        this.visibility        = visibility;
-        this.allowComment      = allowComment;
-        this.allowLike         = allowLike;
-        this.allowSearch       = allowSearch;
-        this.thumbnailImageUrl = thumbnailImageUrl;
-        this.mainTopic         = mainTopic;
-        this.subTopic          = subTopic;
+    public void update(@NotBlank String title, @NotBlank String content, @NotNull PostVisibility visibility, Boolean allowComment, Boolean allowLike, Boolean allowSearch, String thumbnailImageUrl, @NotNull TopicType mainTopic, @NotNull SubTopic subTopic) {
+    }
+
+    public void update(PostRequestDto dto) {
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+        this.thumbnailImageUrl = dto.getThumbnailImageUrl();
+        this.mainTopic = dto.getMainTopic();
+        this.subTopic = dto.getSubTopic();
+//        this.updatedAt = LocalDateTime.now(); 작성일시로 기본 고정
     }
 }

@@ -1,15 +1,51 @@
 package com.playblog.blogservice.ftp.common;
 
+import com.playblog.blogservice.ftp.common.config.FtpProperties;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+@Configuration
 public class FtpUploader {
 
+    private final FtpProperties ftpProperties;
+
+    public FtpUploader(FtpProperties ftpProperties) {
+        this.ftpProperties = ftpProperties;
+    }
+
+
+    public String upload(MultipartFile file) {
+        try (InputStream is = file.getInputStream()) {
+            String ext = extractExtension(file.getOriginalFilename());
+
+            String fileName = FtpUploader.uploadStream(
+                    ftpProperties.getServer(),
+                    ftpProperties.getPort(),
+                    ftpProperties.getUser(),
+                    ftpProperties.getPass(),
+                    ftpProperties.getEditorDir(),
+                    is,
+                    ext
+            );
+
+            return ftpProperties.getBaseUrl() + "/" + fileName;
+        } catch (IOException e) {
+            throw new RuntimeException("FTP 업로드 실패", e);
+        }
+    }
+
+    private String extractExtension(String filename) {
+        if (filename == null || !filename.contains(".")) return "";
+        return filename.substring(filename.lastIndexOf("."));
+    }
+
+    /* 일반 파일 전송할 때 */
     /**
      * FTP 서버에 파일을 UUID 파일명으로 업로드하고,
      * 성공하면 저장된 파일명(UUID.확장자)을 반환한다.
@@ -89,7 +125,7 @@ public class FtpUploader {
         return savedFileName;
     }
 
-    /* 썸네일 이미지로 */
+    /* 썸네일 이미지로 전송할 때 인풋 스트림으로 */
     /**
      * 바이트 스트림(InputStream)을 FTP 서버에 업로드하고,
      * UUID + 확장자 형태의 파일명을 반환합니다.

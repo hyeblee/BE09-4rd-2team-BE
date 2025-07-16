@@ -21,4 +21,7 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
     // 게시글 공감 삭제
     void deleteByPost_IdAndUser_Id(Long postId, Long userId);
+
+    // 본인이므로 공감 여부 확인 불필요 또는 직접 조회 가능
+    Boolean existsByPost_IdAndUser_Id(Long postId, Long userId);
 }

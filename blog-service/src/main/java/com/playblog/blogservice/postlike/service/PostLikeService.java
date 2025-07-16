@@ -34,10 +34,10 @@ public class PostLikeService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        // 2. 공감 허용 여부 확인
-        if (post.getAllowLike() != null && !post.getAllowLike()) {
-            throw new IllegalArgumentException("이 게시글은 공감을 허용하지 않습니다.");
-        }
+//        // 2. 공감 허용 여부 확인
+//        if (post.getAllowLike() != null && !post.getAllowLike()) {
+//            throw new IllegalArgumentException("이 게시글은 공감을 허용하지 않습니다.");
+//        }
 
         // 3. 사용자 존재 확인
         User user = userRepository.findById(userId)

@@ -1,11 +1,8 @@
 package com.playblog.blogservice.user;
 
-
 import com.playblog.blogservice.userInfo.UserInfo;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
@@ -28,6 +25,9 @@ public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
+
+  @Column(nullable = false)
+  private String emailId;
 
   @Column(nullable = false)
   private String password;
